@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -360,15 +360,40 @@
 
 <body>
     <header>
-        <nav>
-            <div class="logo">🌸 PERFUME</div>
-            <ul class="nav-links">
-                <li><a href="#home">الرئيسية</a></li>
-                <li><a href="#about">من نحن</a></li>
-                <li><a href="#popular">الأكثر طلباً</a></li>
-                <li><a href="#contact">اتصل بنا</a></li>
-            </ul>
-        </nav>
+       <nav>
+
+    <div class="logo">🌸 PERFUME</div>
+
+    <ul class="nav-links">
+        <li><a href="#home">{% trans "Home" %}</a></li>
+        <li><a href="#about">{% trans "About Us" %}</a></li>
+        <li><a href="#popular">{% trans "Most Popular" %}</a></li>
+        <li><a href="#contact">{% trans "Contact Us" %}</a></li>
+    </ul>
+
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+
+        <input name="next" type="hidden" value="{{ request.path }}">
+
+        {% get_current_language as LANGUAGE_CODE %}
+
+        <select name="language" onchange="this.form.submit()">
+
+            <option value="en"
+                {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>
+                English
+            </option>
+
+            <option value="ar"
+                {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>
+                العربية
+            </option>
+
+        </select>
+    </form>
+
+</nav>
     </header>
 
     <section class="hero" id="home">
