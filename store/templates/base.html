@@ -1,0 +1,119 @@
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PERFUME{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="brand" href="{% url 'home' %}">
+                <span class="brand-mark">P</span>
+                <span>PERFUME</span>
+            </a>
+
+            <button class="menu-toggle" type="button" aria-label="Menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="{% url 'home' %}#home">
+                    {% if LANGUAGE_CODE == 'ar' %}الرئيسية{% else %}Home{% endif %}
+                </a>
+                <a href="{% url 'home' %}#collection">
+                    {% if LANGUAGE_CODE == 'ar' %}المجموعة{% else %}Collection{% endif %}
+                </a>
+                <a href="{% url 'home' %}#about">
+                    {% if LANGUAGE_CODE == 'ar' %}من نحن{% else %}About{% endif %}
+                </a>
+                <a href="{% url 'home' %}#contact">
+                    {% if LANGUAGE_CODE == 'ar' %}تواصل معنا{% else %}Contact{% endif %}
+                </a>
+            </nav>
+
+            <div class="nav-actions">
+                <form class="language-form" action="{% url 'set_language' %}" method="post">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.path }}">
+                    <select name="language" onchange="this.form.submit()" aria-label="Language">
+                        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                        <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>AR</option>
+                    </select>
+                </form>
+
+                <button id="themeToggle" class="icon-button" type="button"
+                        aria-label="{% if LANGUAGE_CODE == 'ar' %}تغيير الثيم{% else %}Toggle theme{% endif %}">
+                    ☾
+                </button>
+
+                {% if user.is_authenticated %}
+                    <a class="account-link" href="{% url 'profile' %}">
+                        <span class="account-dot"></span>
+                        {{ user.username }}
+                    </a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button class="text-button" type="submit">
+                            {% if LANGUAGE_CODE == 'ar' %}خروج{% else %}Logout{% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <a class="text-button" href="{% url 'login' %}">
+                        {% if LANGUAGE_CODE == 'ar' %}دخول{% else %}Login{% endif %}
+                    </a>
+                    <a class="nav-cta" href="{% url 'register' %}">
+                        {% if LANGUAGE_CODE == 'ar' %}إنشاء حساب{% else %}Register{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer" id="contact">
+        <div class="footer-grid">
+            <div>
+                <a class="brand footer-brand" href="{% url 'home' %}">
+                    <span class="brand-mark">P</span>
+                    <span>PERFUME</span>
+                </a>
+                <p class="footer-copy">
+                    {% if LANGUAGE_CODE == 'ar' %}
+                        عطور مختارة بعناية لتصنع حضوراً لا يُنسى.
+                    {% else %}
+                        Carefully selected fragrances for a presence that lasts.
+                    {% endif %}
+                </p>
+            </div>
+
+            <div>
+                <h3>{% if LANGUAGE_CODE == 'ar' %}روابط{% else %}Explore{% endif %}</h3>
+                <a href="{% url 'home' %}#collection">{% if LANGUAGE_CODE == 'ar' %}المجموعة{% else %}Collection{% endif %}</a>
+                <a href="{% url 'home' %}#about">{% if LANGUAGE_CODE == 'ar' %}من نحن{% else %}About{% endif %}</a>
+            </div>
+
+            <div>
+                <h3>{% if LANGUAGE_CODE == 'ar' %}تواصل{% else %}Contact{% endif %}</h3>
+                <p>+966 50 123 4567</p>
+                <p>Naif7iqul@gmail.com</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>© 2026 PERFUME</span>
+            <span>{% if LANGUAGE_CODE == 'ar' %}جميع الحقوق محفوظة{% else %}All rights reserved{% endif %}</span>
+        </div>
+    </footer>
+
+    <script src="{% static 'store/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
