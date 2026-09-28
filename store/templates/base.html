@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PERFUME{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=20260927-3">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -37,6 +37,19 @@
             </nav>
 
             <div class="nav-actions">
+                {% if user.is_staff %}
+                    <a class="admin-nav-link" href="{% url 'admin_dashboard' %}">
+                        {% if LANGUAGE_CODE == 'ar' %}لوحة الإدارة{% else %}Dashboard{% endif %}
+                    </a>
+                {% endif %}
+                <a class="cart-link" href="{% url 'cart' %}" aria-label="{% if LANGUAGE_CODE == 'ar' %}سلة التسوق{% else %}Shopping cart{% endif %}">
+                    <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M5.5 8.5h13l1 12h-15l1-12Z" />
+                        <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+                    </svg>
+                    {% if LANGUAGE_CODE == 'ar' %}السلة{% else %}Cart{% endif %}
+                    <span class="cart-count">{{ cart_item_count }}</span>
+                </a>
                 <form class="language-form" action="{% url 'set_language' %}" method="post">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ request.path }}">
@@ -75,6 +88,13 @@
     </header>
 
     <main>
+        {% if messages %}
+            <div class="messages-shell" role="status">
+                {% for message in messages %}
+                    <p class="message message-{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
 
@@ -113,7 +133,7 @@
         </div>
     </footer>
 
-    <script src="{% static 'store/js/main.js' %}"></script>
+    <script src="{% static 'store/js/main.js' %}?v=20260927-2"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

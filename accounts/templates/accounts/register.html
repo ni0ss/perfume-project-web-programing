@@ -1,31 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Register - PERFUME</title>
-</head>
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}إنشاء حساب{% else %}Create an account{% endif %} - PERFUME{% endblock %}
 
-<body>
-
-    <h1>Create Account</h1>
-
-    <form method="POST">
-
-        {% csrf_token %}
-
-        {{ form.as_p }}
-
-        <button type="submit">
-            Register
-        </button>
-
-    </form>
-
-    <p>
-        Already have an account?
-        <a href="{% url 'login' %}">Login</a>
-    </p>
-
-</body>
-</html>
+{% block content %}
+<section class="account-shell">
+    <div class="account-card">
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}أنشئ حسابك{% else %}Create your account{% endif %}</h1>
+        <p>{% if LANGUAGE_CODE == 'ar' %}احتفظ بسلتك وتابع طلباتك من مكان واحد.{% else %}Save your cart and follow your orders in one place.{% endif %}</p>
+        <form class="account-form" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="field-help">{{ field.help_text|safe }}</div>{% endif %}
+                    {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            <button class="primary-button form-submit" type="submit">{% if LANGUAGE_CODE == 'ar' %}إنشاء الحساب{% else %}Create account{% endif %}</button>
+        </form>
+        <p class="account-switch">{% if LANGUAGE_CODE == 'ar' %}عندك حساب؟{% else %}Already have an account?{% endif %} <a href="{% url 'login' %}">{% if LANGUAGE_CODE == 'ar' %}سجّل الدخول{% else %}Sign in{% endif %}</a></p>
+    </div>
+</section>
+{% endblock %}

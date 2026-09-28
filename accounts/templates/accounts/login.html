@@ -1,31 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Login - PERFUME</title>
-</head>
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}تسجيل الدخول{% else %}Sign in{% endif %} - PERFUME{% endblock %}
 
-<body>
-
-    <h1>Login</h1>
-
-    <form method="POST">
-
-        {% csrf_token %}
-
-        {{ form.as_p }}
-
-        <button type="submit">
-            Login
-        </button>
-
-    </form>
-
-    <p>
-        Don't have an account?
-        <a href="{% url 'register' %}">Register</a>
-    </p>
-
-</body>
-</html>
+{% block content %}
+<section class="account-shell">
+    <div class="account-card">
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}أهلاً بعودتك{% else %}Welcome back{% endif %}</h1>
+        <p>{% if LANGUAGE_CODE == 'ar' %}سجّل الدخول للمتابعة وإتمام طلبك.{% else %}Sign in to continue and complete your order.{% endif %}</p>
+        <form class="account-form" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="primary-button form-submit" type="submit">{% if LANGUAGE_CODE == 'ar' %}دخول{% else %}Sign in{% endif %}</button>
+        </form>
+        <p class="account-switch">{% if LANGUAGE_CODE == 'ar' %}ما عندك حساب؟{% else %}New to PERFUME?{% endif %} <a href="{% url 'register' %}">{% if LANGUAGE_CODE == 'ar' %}أنشئ حساباً{% else %}Create an account{% endif %}</a></p>
+    </div>
+</section>
+{% endblock %}

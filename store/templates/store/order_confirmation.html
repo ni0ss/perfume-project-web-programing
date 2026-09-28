@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}تم استلام الطلب{% else %}Order received{% endif %} - PERFUME{% endblock %}
+
+{% block content %}
+<section class="section-shell commerce-shell">
+    <div class="confirmation-card">
+        <span class="confirmation-mark">✓</span>
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}تم استلام طلبك{% else %}Your order is confirmed{% endif %}</h1>
+        <p>{% if LANGUAGE_CODE == 'ar' %}رقم الطلب{% else %}Order number{% endif %}: <strong>#{{ order.pk }}</strong></p>
+        <p class="demo-payment-note">{% if LANGUAGE_CODE == 'ar' %}طلب جامعي تجريبي — لم يتم تحصيل أي مبلغ.{% else %}Academic demo order — no payment was collected.{% endif %}</p>
+        <div class="confirmation-summary">
+            {% for item in order.items.all %}
+                <div><span>{{ item.product_name }} × {{ item.quantity }}</span><strong><bdi class="money" dir="ltr">SAR {{ item.unit_price|unlocalize }}</bdi></strong></div>
+            {% endfor %}
+            <div><span>{% if LANGUAGE_CODE == 'ar' %}الإجمالي{% else %}Total{% endif %}</span><strong><bdi class="money" dir="ltr">SAR {{ order.total|unlocalize }}</bdi></strong></div>
+        </div>
+        <p class="delivery-address">{{ order.full_name }} · {{ order.phone }}<br>{{ order.city }}، {{ order.address }}</p>
+        <div class="confirmation-actions">
+            <a class="primary-button" href="{% url 'profile' %}">{% if LANGUAGE_CODE == 'ar' %}عرض طلباتي{% else %}View my orders{% endif %}</a>
+            <a class="secondary-button" href="{% url 'home' %}">{% if LANGUAGE_CODE == 'ar' %}العودة للمتجر{% else %}Return to store{% endif %}</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

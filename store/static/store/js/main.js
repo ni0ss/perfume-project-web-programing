@@ -33,18 +33,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Temporary visual feedback for cart button.
-    // We will replace this with the real Django cart backend in the cart phase.
-    document.querySelectorAll(".product-action").forEach(button => {
-        button.addEventListener("click", () => {
-            const originalText = button.textContent;
-            button.textContent = document.documentElement.lang === "ar" ? "قريباً" : "Coming soon";
-            button.disabled = true;
-
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.disabled = false;
-            }, 1200);
-        });
-    });
 });

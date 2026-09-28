@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{{ product.name }} - PERFUME{% endblock %}
+
+{% block content %}
+<section class="section-shell product-detail-shell">
+    <a class="back-link" href="{% url 'home' %}#collection">
+        {% if LANGUAGE_CODE == 'ar' %}← العودة للمجموعة{% else %}← Back to collection{% endif %}
+    </a>
+    <article class="product-detail-card">
+        <div class="product-detail-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="product-placeholder"><span>P</span><small>PERFUME</small></div>
+            {% endif %}
+        </div>
+        <div class="product-detail-copy">
+            <p class="eyebrow">PERFUME COLLECTION</p>
+            <h1>{{ product.name }}</h1>
+            <p class="product-detail-price"><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></p>
+            <p class="product-detail-description">{{ product.description|linebreaksbr }}</p>
+            <p class="stock-note">
+                {% if product.stock %}
+                    {% if LANGUAGE_CODE == 'ar' %}متوفر — الكمية المتبقية: {{ product.stock }}{% else %}In stock — {{ product.stock }} available{% endif %}
+                {% else %}
+                    {% if LANGUAGE_CODE == 'ar' %}نفد المخزون{% else %}Sold out{% endif %}
+                {% endif %}
+            </p>
+            <form method="post" action="{% url 'cart_add' product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="primary-button form-submit" type="submit" {% if not product.stock %}disabled{% endif %}>
+                    {% if LANGUAGE_CODE == 'ar' %}أضف للسلة{% else %}Add to cart{% endif %}
+                </button>
+            </form>
+        </div>
+    </article>
+</section>
+{% endblock %}

@@ -1,27 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Profile - PERFUME</title>
-</head>
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}حسابي{% else %}My account{% endif %} - PERFUME{% endblock %}
 
-<body>
-
-    <h1>My Profile</h1>
-
-    <p>
-        Welcome, {{ user.username }}
-    </p>
-
-    <p>
-        Email: {{ user.email }}
-    </p>
-
-    <a href="{% url 'home' %}">
-        Back to Home
-    </a>
-
-</body>
-
-</html>
+{% block content %}
+<section class="section-shell commerce-shell">
+    <div class="commerce-heading">
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}مرحباً، {{ user.username }}{% else %}Welcome, {{ user.username }}{% endif %}</h1>
+        <p>{{ user.email }}</p>
+    </div>
+    <div class="profile-orders">
+        <h2>{% if LANGUAGE_CODE == 'ar' %}طلباتي{% else %}My orders{% endif %}</h2>
+        {% for order in orders %}
+            <a class="profile-order" href="{% url 'order_confirmation' order.pk %}">
+                <span><strong>#{% if LANGUAGE_CODE == 'ar' %}{{ order.pk }}{% else %}{{ order.pk }}{% endif %}</strong><small>{{ order.created_at|date:'Y-m-d H:i' }}</small></span>
+                <span>
+                    {% if LANGUAGE_CODE == 'ar' %}{{ order.get_status_display }}
+                    {% elif order.status == 'pending' %}New
+                    {% elif order.status == 'processing' %}Processing
+                    {% elif order.status == 'shipped' %}Shipped
+                    {% elif order.status == 'delivered' %}Delivered
+                    {% else %}Cancelled{% endif %}
+                </span>
+                <strong><bdi class="money" dir="ltr">SAR {{ order.total|unlocalize }}</bdi></strong>
+            </a>
+        {% empty %}
+            <div class="empty-commerce compact-empty">
+                <p>{% if LANGUAGE_CODE == 'ar' %}ما عندك طلبات حتى الآن.{% else %}You haven’t placed an order yet.{% endif %}</p>
+                <a class="primary-button" href="{% url 'home' %}#collection">{% if LANGUAGE_CODE == 'ar' %}تسوق المجموعة{% else %}Shop the collection{% endif %}</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

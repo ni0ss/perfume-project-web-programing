@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}إتمام الطلب{% else %}Checkout{% endif %} - PERFUME{% endblock %}
+
+{% block content %}
+<section class="section-shell commerce-shell">
+    <div class="commerce-heading">
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}إتمام الطلب{% else %}Checkout{% endif %}</h1>
+        <p>{% if LANGUAGE_CODE == 'ar' %}أدخل بيانات التوصيل لتسجيل طلب تجريبي.{% else %}Enter delivery details to place a demo order.{% endif %}</p>
+    </div>
+    <div class="commerce-layout checkout-layout">
+        <form class="checkout-form" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="demo-payment-note">
+                <strong>{% if LANGUAGE_CODE == 'ar' %}دفع تجريبي{% else %}Demo payment{% endif %}</strong>
+                <p>{% if LANGUAGE_CODE == 'ar' %}هذا المشروع لا يتصل ببوابة دفع ولن يتم تحصيل أي مبلغ.{% else %}This project is not connected to a payment gateway. No money will be charged.{% endif %}</p>
+            </div>
+            <button class="primary-button form-submit" type="submit">{% if LANGUAGE_CODE == 'ar' %}تأكيد الطلب التجريبي{% else %}Place demo order{% endif %}</button>
+        </form>
+        <aside class="order-summary">
+            <h2>{% if LANGUAGE_CODE == 'ar' %}ملخص الطلب{% else %}Order summary{% endif %}</h2>
+            {% for line in cart_lines %}
+                <div class="checkout-summary-item">
+                    <span>{{ line.product.name }} × {{ line.quantity }}</span>
+                    <strong><bdi class="money" dir="ltr">SAR {{ line.line_total|unlocalize }}</bdi></strong>
+                </div>
+            {% endfor %}
+            <div><span>{% if LANGUAGE_CODE == 'ar' %}المجموع الفرعي{% else %}Subtotal{% endif %}</span><strong><bdi class="money" dir="ltr">SAR {{ subtotal|unlocalize }}</bdi></strong></div>
+            <div><span>{% if LANGUAGE_CODE == 'ar' %}الشحن{% else %}Shipping{% endif %}</span><strong>{% if shipping_fee %}<bdi class="money" dir="ltr">SAR {{ shipping_fee|unlocalize }}</bdi>{% else %}{% if LANGUAGE_CODE == 'ar' %}مجاني{% else %}Free{% endif %}{% endif %}</strong></div>
+            <div class="summary-total"><span>{% if LANGUAGE_CODE == 'ar' %}الإجمالي{% else %}Total{% endif %}</span><strong><bdi class="money" dir="ltr">SAR {{ total|unlocalize }}</bdi></strong></div>
+            <a class="back-link" href="{% url 'cart' %}">{% if LANGUAGE_CODE == 'ar' %}العودة للسلة{% else %}Back to cart{% endif %}</a>
+        </aside>
+    </div>
+</section>
+{% endblock %}

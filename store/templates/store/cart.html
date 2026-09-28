@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{% if LANGUAGE_CODE == 'ar' %}سلة التسوق{% else %}Your cart{% endif %} - PERFUME{% endblock %}
+
+{% block content %}
+<section class="section-shell commerce-shell">
+    <div class="commerce-heading">
+        <p class="eyebrow">PERFUME</p>
+        <h1>{% if LANGUAGE_CODE == 'ar' %}سلة التسوق{% else %}Your cart{% endif %}</h1>
+        <p>{% if LANGUAGE_CODE == 'ar' %}راجع منتجاتك وكمياتها قبل إتمام الطلب.{% else %}Review your items and quantities before checkout.{% endif %}</p>
+    </div>
+
+    {% if cart_lines %}
+        <div class="commerce-layout">
+            <div class="cart-items">
+                {% for line in cart_lines %}
+                    <article class="cart-item">
+                        <a class="cart-item-image" href="{% url 'product_detail' line.product.id %}">
+                            {% if line.product.image %}<img src="{{ line.product.image.url }}" alt="{{ line.product.name }}">
+                            {% else %}<span>P</span>{% endif %}
+                        </a>
+                        <div class="cart-item-copy">
+                            <h2><a href="{% url 'product_detail' line.product.id %}">{{ line.product.name }}</a></h2>
+                            <p><bdi class="money" dir="ltr">SAR {{ line.product.price|unlocalize }}</bdi></p>
+                            {% if not line.in_stock %}<p class="form-error">{% if LANGUAGE_CODE == 'ar' %}الكمية المطلوبة غير متوفرة. المتاح: {{ line.available_quantity }}{% else %}Requested quantity unavailable. In stock: {{ line.available_quantity }}{% endif %}</p>{% endif %}
+                            <div class="cart-item-actions">
+                                <form class="quantity-form" method="post" action="{% url 'cart_update' line.product.id %}">
+                                    {% csrf_token %}
+                                    <label for="quantity-{{ line.product.id }}">{% if LANGUAGE_CODE == 'ar' %}الكمية{% else %}Quantity{% endif %}</label>
+                                    <input id="quantity-{{ line.product.id }}" type="number" name="quantity" min="0" max="{{ line.available_quantity }}" value="{{ line.quantity }}">
+                                    <button class="small-button" type="submit">{% if LANGUAGE_CODE == 'ar' %}تحديث{% else %}Update{% endif %}</button>
+                                </form>
+                                <form method="post" action="{% url 'cart_remove' line.product.id %}">
+                                    {% csrf_token %}
+                                    <button class="text-button remove-button" type="submit">{% if LANGUAGE_CODE == 'ar' %}حذف{% else %}Remove{% endif %}</button>
+                                </form>
+                            </div>
+                        </div>
+                        <strong class="cart-line-total"><bdi class="money" dir="ltr">SAR {{ line.line_total|unlocalize }}</bdi></strong>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <aside class="order-summary">
+                <h2>{% if LANGUAGE_CODE == 'ar' %}ملخص الطلب{% else %}Order summary{% endif %}</h2>
+                <div><span>{% if LANGUAGE_CODE == 'ar' %}المجموع الفرعي{% else %}Subtotal{% endif %}</span><strong><bdi class="money" dir="ltr">SAR {{ subtotal|unlocalize }}</bdi></strong></div>
+                <div><span>{% if LANGUAGE_CODE == 'ar' %}الشحن{% else %}Shipping{% endif %}</span><strong>{% if shipping_fee %}<bdi class="money" dir="ltr">SAR {{ shipping_fee|unlocalize }}</bdi>{% else %}{% if LANGUAGE_CODE == 'ar' %}مجاني{% else %}Free{% endif %}{% endif %}</strong></div>
+                <div class="summary-total"><span>{% if LANGUAGE_CODE == 'ar' %}الإجمالي{% else %}Total{% endif %}</span><strong><bdi class="money" dir="ltr">SAR {{ total|unlocalize }}</bdi></strong></div>
+                {% if can_checkout %}
+                    <a class="primary-button summary-button" href="{% url 'checkout' %}">{% if LANGUAGE_CODE == 'ar' %}متابعة لإتمام الطلب{% else %}Continue to checkout{% endif %}</a>
+                {% else %}
+                    <p class="form-error">{% if LANGUAGE_CODE == 'ar' %}عدّل الكميات لتطابق المخزون قبل المتابعة.{% else %}Adjust quantities to match stock before continuing.{% endif %}</p>
+                {% endif %}
+                {% if not user.is_authenticated %}<p class="summary-note">{% if LANGUAGE_CODE == 'ar' %}سيُطلب منك تسجيل الدخول قبل إتمام الطلب. ستبقى سلتك محفوظة.{% else %}You’ll be asked to sign in before checkout. Your cart will be saved.{% endif %}</p>{% endif %}
+            </aside>
+        </div>
+    {% else %}
+        <div class="empty-commerce">
+            <span>P</span>
+            <h2>{% if LANGUAGE_CODE == 'ar' %}سلتك فارغة{% else %}Your cart is empty{% endif %}</h2>
+            <p>{% if LANGUAGE_CODE == 'ar' %}استكشف المجموعة واختر عطرك المفضل.{% else %}Explore the collection and find your signature scent.{% endif %}</p>
+            <a class="primary-button" href="{% url 'home' %}#collection">{% if LANGUAGE_CODE == 'ar' %}تسوق المجموعة{% else %}Shop collection{% endif %}</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

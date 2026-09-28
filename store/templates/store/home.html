@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n l10n %}
 {% get_current_language as LANGUAGE_CODE %}
 
 {% block title %}
@@ -92,21 +92,33 @@
                             <small>PERFUME</small>
                         </div>
                     {% endif %}
-                    <span class="availability-badge">
-                        {% if LANGUAGE_CODE == 'ar' %}متوفر{% else %}Available{% endif %}
+                    <span class="availability-badge {% if not product.stock %}availability-empty{% endif %}">
+                        {% if product.stock %}
+                            {% if LANGUAGE_CODE == 'ar' %}متوفر{% else %}Available{% endif %}
+                        {% else %}
+                            {% if LANGUAGE_CODE == 'ar' %}نفد المخزون{% else %}Sold out{% endif %}
+                        {% endif %}
                     </span>
                 </div>
 
                 <div class="modern-product-info">
                     <p class="product-kicker">PERFUME COLLECTION</p>
-                    <h3>{{ product.name }}</h3>
+                    <h3><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></h3>
                     <p class="product-description">{{ product.description|truncatechars:100 }}</p>
 
                     <div class="product-footer">
-                        <strong class="product-price">{{ product.price }} SAR</strong>
-                        <button class="product-action" type="button" data-product-id="{{ product.id }}">
-                            {% if LANGUAGE_CODE == 'ar' %}أضف للسلة{% else %}Add to cart{% endif %}
-                        </button>
+                        <strong class="product-price"><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></strong>
+                        <form method="post" action="{% url 'cart_add' product.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}#collection">
+                            <button class="product-action" type="submit" {% if not product.stock %}disabled{% endif %}>
+                                {% if not product.stock %}
+                                    {% if LANGUAGE_CODE == 'ar' %}غير متوفر{% else %}Sold out{% endif %}
+                                {% else %}
+                                    {% if LANGUAGE_CODE == 'ar' %}أضف للسلة{% else %}Add to cart{% endif %}
+                                {% endif %}
+                            </button>
+                        </form>
                     </div>
                 </div>
             </article>
