@@ -1,18 +1,54 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import get_language
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField()
+    name = models.CharField(max_length=200, verbose_name='الاسم بالعربية')
+    name_en = models.CharField(max_length=200, blank=True, default='', verbose_name='Name in English')
+    description = models.TextField(verbose_name='الوصف بالعربية')
+    description_en = models.TextField(blank=True, default='', verbose_name='Description in English')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     available = models.BooleanField(default=True)
     stock = models.PositiveIntegerField(default=10, verbose_name='الكمية المتوفرة')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def localized_name(self):
+        if get_language() == 'en' and self.name_en:
+            return self.name_en
+        return self.name
+
+    @property
+    def localized_description(self):
+        if get_language() == 'en' and self.description_en:
+            return self.description_en
+        return self.description
+
     def __str__(self):
         return self.name
+
+
+class StoreContent(models.Model):
+    """Editable bilingual copy for the home page, managed from the store dashboard."""
+
+    hero_title_ar = models.CharField(max_length=180, default='عطرك يروي قصتك.', verbose_name='عنوان الواجهة بالعربية')
+    hero_title_en = models.CharField(max_length=180, default='Your scent. Your signature.', verbose_name='Hero title in English')
+    hero_description_ar = models.TextField(default='اكتشف مجموعة مختارة من العطور الراقية التي تجمع بين الأناقة والأصالة والحضور المميز.', verbose_name='وصف الواجهة بالعربية')
+    hero_description_en = models.TextField(default='Discover refined fragrances selected for elegance, character and an unforgettable presence.', verbose_name='Hero description in English')
+    story_title_ar = models.CharField(max_length=180, default='الأناقة تبدأ بالتفاصيل.', verbose_name='عنوان القصة بالعربية')
+    story_title_en = models.CharField(max_length=180, default='Luxury lives in the details.', verbose_name='Story title in English')
+    story_description_ar = models.TextField(default='بنينا PERFUME ليكون تجربة تسوق بسيطة وحديثة لعشاق العطور. نركز على جودة العرض، سهولة الاستخدام، وتنظيم المنتجات بطريقة واضحة.', verbose_name='وصف القصة بالعربية')
+    story_description_en = models.TextField(default='PERFUME is designed as a clean, modern shopping experience for fragrance lovers, focused on presentation, usability and carefully organized products.', verbose_name='Story description in English')
+
+    @classmethod
+    def get_solo(cls):
+        content, _ = cls.objects.get_or_create(pk=1)
+        return content
+
+    def __str__(self):
+        return 'PERFUME home page content'
 
 
 class Cart(models.Model):

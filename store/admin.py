@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Cart, CartItem, Order, OrderItem, Product
+from .models import Cart, CartItem, Order, OrderItem, Product, StoreContent
 
 
 admin.site.site_header = 'PERFUME | إدارة المتجر'
@@ -10,13 +10,13 @@ admin.site.index_title = 'إدارة منتجات وطلبات المتجر'
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('image_preview', 'name', 'price', 'stock', 'available', 'created_at')
+    list_display = ('image_preview', 'name', 'name_en', 'price', 'stock', 'available', 'created_at')
     list_filter = ('available',)
-    search_fields = ('name', 'description')
+    search_fields = ('name', 'name_en', 'description', 'description_en')
     list_editable = ('stock', 'available')
     list_per_page = 20
     readonly_fields = ('image_preview', 'created_at')
-    fields = ('name', 'description', 'price', 'image', 'image_preview', 'stock', 'available', 'created_at')
+    fields = ('name', 'name_en', 'description', 'description_en', 'price', 'image', 'image_preview', 'stock', 'available', 'created_at')
 
     @admin.display(description='معاينة الصورة')
     def image_preview(self, obj):
@@ -56,3 +56,12 @@ class CartAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email')
     readonly_fields = ('updated_at',)
     inlines = (CartItemInline,)
+
+
+@admin.register(StoreContent)
+class StoreContentAdmin(admin.ModelAdmin):
+    list_display = ('id',)
+    fieldsets = (
+        ('نصوص الصفحة الرئيسية', {'fields': ('hero_title_ar', 'hero_title_en', 'hero_description_ar', 'hero_description_en')}),
+        ('قسم قصتنا', {'fields': ('story_title_ar', 'story_title_en', 'story_description_ar', 'story_description_en')}),
+    )

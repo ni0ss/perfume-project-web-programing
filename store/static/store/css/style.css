@@ -1277,6 +1277,75 @@ html[dir="rtl"] .cart-item-copy,
 html[dir="rtl"] .form-field,
 html[dir="rtl"] .order-summary { min-width: 0; }
 
+.dashboard-manage-panel,
+.content-editor-panel { margin-top: 20px; }
+.dashboard-order-status {
+    min-height: 34px;
+    padding: 5px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+}
+.admin-product-cell { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+.admin-product-cell strong { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.admin-row-actions { display: flex; align-items: center; gap: 12px; }
+.admin-row-actions .text-button { color: var(--accent-dark); font-size: 12px; }
+.admin-row-actions .delete-product-button { color: #a54f44; }
+.store-content-form,
+.product-editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.store-content-form { align-items: start; }
+.store-content-form label,
+.product-editor-grid label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 650; }
+.store-content-form .form-control,
+.product-editor-grid .form-control { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); padding: 10px 12px; }
+.store-content-form textarea,
+.product-editor-grid textarea { min-height: 92px; resize: vertical; }
+.store-content-form > button { justify-self: start; grid-column: 1 / -1; border: 0; cursor: pointer; }
+.availability-field { display: flex !important; align-items: center; min-height: 44px; }
+.availability-field input { accent-color: var(--accent); width: 17px; height: 17px; }
+.dashboard-feedback { min-height: 24px; margin: 10px 2px 0; color: var(--accent-dark); font-size: 13px; }
+.dashboard-feedback.is-error,
+.form-api-error { color: #a43f37; }
+.product-editor-dialog { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; padding: 26px; overflow: auto; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.product-editor-dialog::backdrop { background: rgba(15, 14, 12, .56); backdrop-filter: blur(3px); }
+.product-editor-dialog .dashboard-panel-heading { margin-bottom: 20px; }
+.dialog-close { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--text); font-size: 25px; cursor: pointer; }
+.dialog-actions { display: flex; gap: 10px; margin-top: 20px; }
+.dialog-actions button { border: 0; cursor: pointer; }
+.form-api-error { min-height: 20px; margin: 12px 0 0; font-size: 13px; }
+
+.assistant-widget { position: fixed; z-index: 200; inset-inline-end: 24px; bottom: 22px; direction: inherit; }
+.assistant-launcher { display: flex; align-items: center; gap: 9px; min-height: 50px; padding: 0 19px; border: 1px solid var(--accent); border-radius: 999px; background: var(--text); color: var(--bg); box-shadow: var(--shadow); font-weight: 700; cursor: pointer; }
+.assistant-launcher span { color: var(--accent); }
+.assistant-panel { position: absolute; inset-inline-end: 0; bottom: 62px; display: flex; flex-direction: column; width: min(380px, calc(100vw - 28px)); height: min(520px, calc(100vh - 130px)); overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.assistant-panel[hidden] { display: none; }
+.assistant-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.assistant-panel-header div { display: grid; gap: 2px; }
+.assistant-panel-header small { color: var(--muted); font-size: 11px; }
+.assistant-close { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 22px; cursor: pointer; }
+.assistant-messages { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; overflow: auto; }
+.assistant-message { max-width: 92%; margin: 0; padding: 10px 12px; border-radius: 13px; background: var(--surface-2); color: var(--text); font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+.assistant-message-user { align-self: flex-end; background: var(--text); color: var(--bg); }
+.assistant-form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+.assistant-form input { min-width: 0; flex: 1; min-height: 42px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 999px; outline: none; background: var(--bg); color: var(--text); }
+.assistant-form button { width: 42px; height: 42px; flex: 0 0 auto; border: 0; border-radius: 50%; background: var(--text); color: var(--bg); font-size: 21px; cursor: pointer; }
+
+@media (max-width: 800px) {
+    .store-content-form,
+    .product-editor-grid { grid-template-columns: 1fr; }
+    .store-content-form > button { grid-column: auto; }
+}
+@media (max-width: 560px) {
+    .assistant-widget { inset-inline-end: 12px; bottom: 12px; }
+    .assistant-launcher { min-height: 46px; padding: 0 14px; font-size: 12px; }
+    .assistant-panel { bottom: 56px; height: min(500px, calc(100vh - 95px)); }
+    .product-editor-dialog { padding: 18px; }
+    .dialog-actions { flex-wrap: wrap; }
+}
+
 @media (max-width: 1050px) {
     .nav-shell { gap: 20px; }
     .nav-actions { flex-wrap: wrap; justify-content: flex-end; }

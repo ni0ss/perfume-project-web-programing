@@ -2,7 +2,7 @@
 {% load i18n l10n %}
 {% get_current_language as LANGUAGE_CODE %}
 
-{% block title %}{{ product.name }} - PERFUME{% endblock %}
+{% block title %}{{ product.localized_name }} - PERFUME{% endblock %}
 
 {% block content %}
 <section class="section-shell product-detail-shell">
@@ -12,16 +12,16 @@
     <article class="product-detail-card">
         <div class="product-detail-image">
             {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <img src="{{ product.image.url }}" alt="{{ product.localized_name }}">
             {% else %}
                 <div class="product-placeholder"><span>P</span><small>PERFUME</small></div>
             {% endif %}
         </div>
         <div class="product-detail-copy">
             <p class="eyebrow">PERFUME COLLECTION</p>
-            <h1>{{ product.name }}</h1>
+            <h1>{{ product.localized_name }}</h1>
             <p class="product-detail-price"><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></p>
-            <p class="product-detail-description">{{ product.description|linebreaksbr }}</p>
+            <p class="product-detail-description">{{ product.localized_description|linebreaksbr }}</p>
             <p class="stock-note">
                 {% if product.stock %}
                     {% if LANGUAGE_CODE == 'ar' %}متوفر — الكمية المتبقية: {{ product.stock }}{% else %}In stock — {{ product.stock }} available{% endif %}

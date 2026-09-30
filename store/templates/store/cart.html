@@ -18,11 +18,11 @@
                 {% for line in cart_lines %}
                     <article class="cart-item">
                         <a class="cart-item-image" href="{% url 'product_detail' line.product.id %}">
-                            {% if line.product.image %}<img src="{{ line.product.image.url }}" alt="{{ line.product.name }}">
+                            {% if line.product.image %}<img src="{{ line.product.image.url }}" alt="{{ line.product.localized_name }}">
                             {% else %}<span>P</span>{% endif %}
                         </a>
                         <div class="cart-item-copy">
-                            <h2><a href="{% url 'product_detail' line.product.id %}">{{ line.product.name }}</a></h2>
+                            <h2><a href="{% url 'product_detail' line.product.id %}">{{ line.product.localized_name }}</a></h2>
                             <p><bdi class="money" dir="ltr">SAR {{ line.product.price|unlocalize }}</bdi></p>
                             {% if not line.in_stock %}<p class="form-error">{% if LANGUAGE_CODE == 'ar' %}الكمية المطلوبة غير متوفرة. المتاح: {{ line.available_quantity }}{% else %}Requested quantity unavailable. In stock: {{ line.available_quantity }}{% endif %}</p>{% endif %}
                             <div class="cart-item-actions">

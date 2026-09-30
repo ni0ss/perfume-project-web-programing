@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PERFUME{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=20260927-3">
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=20260930-1">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -133,7 +133,28 @@
         </div>
     </footer>
 
-    <script src="{% static 'store/js/main.js' %}?v=20260927-2"></script>
+    <div id="csrfTokenSource" hidden>{% csrf_token %}</div>
+    <div class="assistant-widget" id="perfumeAssistant" data-api-url="{% url 'api-assistant' %}" data-language="{{ LANGUAGE_CODE }}">
+        <button class="assistant-launcher" id="assistantToggle" type="button" aria-expanded="false" aria-controls="assistantPanel">
+            <span aria-hidden="true">✦</span>
+            {% if LANGUAGE_CODE == 'ar' %}اسأل مساعد العطور{% else %}Ask the perfume assistant{% endif %}
+        </button>
+        <section class="assistant-panel" id="assistantPanel" hidden aria-label="{% if LANGUAGE_CODE == 'ar' %}مساعد العطور{% else %}Perfume assistant{% endif %}">
+            <header class="assistant-panel-header">
+                <div><strong>{% if LANGUAGE_CODE == 'ar' %}مساعد PERFUME{% else %}PERFUME assistant{% endif %}</strong><small>{% if LANGUAGE_CODE == 'ar' %}إجابات من معلومات المتجر{% else %}Answers from store information{% endif %}</small></div>
+                <button class="assistant-close" id="assistantClose" type="button" aria-label="{% if LANGUAGE_CODE == 'ar' %}إغلاق المساعد{% else %}Close assistant{% endif %}">×</button>
+            </header>
+            <div class="assistant-messages" id="assistantMessages" aria-live="polite">
+                <p class="assistant-message assistant-message-bot">{% if LANGUAGE_CODE == 'ar' %}مرحباً! أستطيع مساعدتك في اختيار عطر أو معرفة الأسعار ومعلومات الطلب.{% else %}Hello! I can help you choose a perfume, check prices, or explain orders.{% endif %}</p>
+            </div>
+            <form class="assistant-form" id="assistantForm">
+                <input id="assistantInput" name="message" maxlength="500" autocomplete="off" required placeholder="{% if LANGUAGE_CODE == 'ar' %}اسأل عن عطر أو سعر...{% else %}Ask about a perfume or price...{% endif %}">
+                <button type="submit" aria-label="{% if LANGUAGE_CODE == 'ar' %}إرسال{% else %}Send{% endif %}">↑</button>
+            </form>
+        </section>
+    </div>
+
+    <script src="{% static 'store/js/main.js' %}?v=20260930-1"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

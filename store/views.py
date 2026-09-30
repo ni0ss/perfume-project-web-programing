@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import CheckoutForm
-from .models import Cart, CartItem, Order, OrderItem, Product
+from .models import Cart, CartItem, Order, OrderItem, Product, StoreContent
 
 
 CART_SESSION_KEY = 'perfume_cart'
@@ -21,7 +21,10 @@ def _localized_message(request, arabic, english):
 
 def home(request):
     products = Product.objects.filter(available=True).order_by('-created_at')
-    return render(request, 'store/home.html', {'products': products})
+    return render(request, 'store/home.html', {
+        'products': products,
+        'page_content': StoreContent.get_solo(),
+    })
 
 
 @login_required
@@ -39,8 +42,10 @@ def admin_dashboard(request):
         'order_count': orders.count(),
         'pending_order_count': orders.filter(status=Order.Status.PENDING).count(),
         'demo_order_value': orders.aggregate(total=Sum('total'))['total'] or Decimal('0.00'),
-        'recent_orders': orders[:6],
+        'recent_orders': orders,
         'low_stock_products': low_stock_products[:6],
+        'manage_products': products.order_by('-created_at'),
+        'page_content': StoreContent.get_solo(),
     })
 
 
@@ -222,7 +227,7 @@ def checkout(request):
                         OrderItem.objects.create(
                             order=order,
                             product=product,
-                            product_name=product.name,
+                            product_name=product.localized_name,
                             unit_price=product.price,
                             quantity=quantity,
                         )

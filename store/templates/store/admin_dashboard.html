@@ -5,7 +5,11 @@
 {% block title %}{% if LANGUAGE_CODE == 'ar' %}لوحة الإدارة{% else %}Store dashboard{% endif %} - PERFUME{% endblock %}
 
 {% block content %}
-<section class="section-shell admin-dashboard-shell">
+<section class="section-shell admin-dashboard-shell"
+         data-api-products="{% url 'api-product-list' %}"
+         data-api-orders="{% url 'api-order-list' %}"
+         data-api-content="{% url 'api-store-content' %}"
+         data-language="{{ LANGUAGE_CODE }}">
     <div class="admin-dashboard-heading">
         <div>
             <p class="eyebrow">PERFUME · {% if LANGUAGE_CODE == 'ar' %}إدارة المتجر{% else %}STORE ADMIN{% endif %}</p>
@@ -13,8 +17,8 @@
             <p>{% if LANGUAGE_CODE == 'ar' %}نظرة سريعة على المنتجات والمخزون والطلبات التجريبية.{% else %}A quick overview of products, inventory and demo orders.{% endif %}</p>
         </div>
         <div class="dashboard-actions">
-            <a class="secondary-button" href="{% url 'admin:index' %}">{% if LANGUAGE_CODE == 'ar' %}إدارة Django{% else %}Django Admin{% endif %}</a>
-            <a class="primary-button" href="{% url 'admin:store_product_add' %}">{% if LANGUAGE_CODE == 'ar' %}+ إضافة منتج{% else %}+ Add product{% endif %}</a>
+            <a class="secondary-button" href="{% url 'api-root' %}">{% if LANGUAGE_CODE == 'ar' %}عرض REST API{% else %}View REST API{% endif %}</a>
+            <button class="primary-button" type="button" id="newProductButton">{% if LANGUAGE_CODE == 'ar' %}+ إضافة عطر{% else %}+ Add perfume{% endif %}</button>
         </div>
     </div>
 
@@ -49,10 +53,10 @@
         <section class="dashboard-panel">
             <div class="dashboard-panel-heading">
                 <div>
-                    <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}آخر النشاط{% else %}LATEST ACTIVITY{% endif %}</p>
-                    <h2>{% if LANGUAGE_CODE == 'ar' %}أحدث الطلبات{% else %}Recent orders{% endif %}</h2>
+                    <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}إدارة المتجر{% else %}STORE MANAGEMENT{% endif %}</p>
+                    <h2>{% if LANGUAGE_CODE == 'ar' %}كل الطلبات{% else %}All orders{% endif %}</h2>
                 </div>
-                <a href="{% url 'admin:store_order_changelist' %}">{% if LANGUAGE_CODE == 'ar' %}كل الطلبات{% else %}All orders{% endif %} ←</a>
+                <a href="{% url 'api-order-list' %}">{% if LANGUAGE_CODE == 'ar' %}REST API{% else %}REST API{% endif %} ↗</a>
             </div>
             {% if recent_orders %}
                 <div class="dashboard-table-wrap">
@@ -68,16 +72,17 @@
                         <tbody>
                             {% for order in recent_orders %}
                                 <tr>
-                                    <td><a href="{% url 'admin:store_order_change' order.pk %}">#{{ order.pk }}</a><small>{{ order.created_at|date:'Y-m-d' }}</small></td>
+                                    <td><strong>#{{ order.pk }}</strong><small>{{ order.created_at|date:'Y-m-d' }}</small></td>
                                     <td>{{ order.full_name }}</td>
-                                    <td><span class="dashboard-status status-{{ order.status }}">
-                                        {% if LANGUAGE_CODE == 'ar' %}{{ order.get_status_display }}
-                                        {% elif order.status == 'pending' %}New
-                                        {% elif order.status == 'processing' %}Processing
-                                        {% elif order.status == 'shipped' %}Shipped
-                                        {% elif order.status == 'delivered' %}Delivered
-                                        {% else %}Cancelled{% endif %}
-                                    </span></td>
+                                    <td>
+                                        <select class="dashboard-order-status status-{{ order.status }}" data-order-id="{{ order.pk }}" aria-label="{% if LANGUAGE_CODE == 'ar' %}حالة الطلب {{ order.pk }}{% else %}Status for order {{ order.pk }}{% endif %}">
+                                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>{% if LANGUAGE_CODE == 'ar' %}جديد{% else %}New{% endif %}</option>
+                                            <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>{% if LANGUAGE_CODE == 'ar' %}قيد التجهيز{% else %}Processing{% endif %}</option>
+                                            <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>{% if LANGUAGE_CODE == 'ar' %}تم الشحن{% else %}Shipped{% endif %}</option>
+                                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>{% if LANGUAGE_CODE == 'ar' %}مكتمل{% else %}Delivered{% endif %}</option>
+                                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>{% if LANGUAGE_CODE == 'ar' %}ملغي{% else %}Cancelled{% endif %}</option>
+                                        </select>
+                                    </td>
                                     <td><bdi class="money" dir="ltr">SAR {{ order.total|unlocalize }}</bdi></td>
                                 </tr>
                             {% endfor %}
@@ -95,17 +100,17 @@
                     <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}متابعة المخزون{% else %}INVENTORY WATCH{% endif %}</p>
                     <h2>{% if LANGUAGE_CODE == 'ar' %}مخزون يحتاج انتباه{% else %}Stock to review{% endif %}</h2>
                 </div>
-                <a href="{% url 'admin:store_product_changelist' %}">{% if LANGUAGE_CODE == 'ar' %}المنتجات{% else %}Products{% endif %} ←</a>
+                <a href="#manage-products">{% if LANGUAGE_CODE == 'ar' %}إدارة العطور{% else %}Manage perfumes{% endif %} ↓</a>
             </div>
             {% if low_stock_products %}
                 <div class="dashboard-stock-list">
                     {% for product in low_stock_products %}
-                        <a class="dashboard-stock-item" href="{% url 'admin:store_product_change' product.pk %}">
+                        <a class="dashboard-stock-item" href="#manage-products">
                             <span class="stock-product-image">
                                 {% if product.image %}<img src="{{ product.image.url }}" alt="">
                                 {% else %}<span>P</span>{% endif %}
                             </span>
-                            <span class="stock-product-copy"><strong>{{ product.name }}</strong><small>{% if LANGUAGE_CODE == 'ar' %}المخزون المتبقي{% else %}Remaining stock{% endif %}</small></span>
+                            <span class="stock-product-copy"><strong>{{ product.localized_name }}</strong><small>{% if LANGUAGE_CODE == 'ar' %}المخزون المتبقي{% else %}Remaining stock{% endif %}</small></span>
                             <strong class="stock-number">{{ product.stock }}</strong>
                         </a>
                     {% endfor %}
@@ -115,5 +120,111 @@
             {% endif %}
         </section>
     </div>
+
+    <section class="dashboard-panel dashboard-manage-panel" id="manage-products">
+        <div class="dashboard-panel-heading">
+            <div>
+                <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}كتالوج المتجر{% else %}STORE CATALOG{% endif %}</p>
+                <h2>{% if LANGUAGE_CODE == 'ar' %}إدارة العطور{% else %}Manage perfumes{% endif %}</h2>
+            </div>
+            <button class="secondary-button" type="button" id="newProductButtonSecondary">{% if LANGUAGE_CODE == 'ar' %}+ إضافة عطر{% else %}+ Add perfume{% endif %}</button>
+        </div>
+        <div class="dashboard-table-wrap">
+            <table class="dashboard-table product-admin-table">
+                <thead><tr>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}العطر{% else %}Perfume{% endif %}</th>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}الاسم الإنجليزي{% else %}English name{% endif %}</th>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}السعر{% else %}Price{% endif %}</th>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}المخزون{% else %}Stock{% endif %}</th>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}الحالة{% else %}Status{% endif %}</th>
+                    <th>{% if LANGUAGE_CODE == 'ar' %}الإجراء{% else %}Actions{% endif %}</th>
+                </tr></thead>
+                <tbody>
+                    {% for product in manage_products %}
+                        <tr>
+                            <td>
+                                <div class="admin-product-cell">
+                                    <span class="stock-product-image">{% if product.image %}<img src="{{ product.image.url }}" alt="">{% else %}<span>P</span>{% endif %}</span>
+                                    <strong>{{ product.name }}</strong>
+                                </div>
+                            </td>
+                            <td>{{ product.name_en|default:'—' }}</td>
+                            <td><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></td>
+                            <td>{{ product.stock }}</td>
+                            <td>{% if product.available %}{% if LANGUAGE_CODE == 'ar' %}متاح{% else %}Available{% endif %}{% else %}{% if LANGUAGE_CODE == 'ar' %}مخفي{% else %}Hidden{% endif %}{% endif %}</td>
+                            <td>
+                                <div class="admin-row-actions">
+                                    <button class="text-button edit-product-button" type="button"
+                                            data-id="{{ product.pk }}"
+                                            data-name="{{ product.name }}"
+                                            data-name-en="{{ product.name_en }}"
+                                            data-description="{{ product.description }}"
+                                            data-description-en="{{ product.description_en }}"
+                                            data-price="{{ product.price|unlocalize }}"
+                                            data-stock="{{ product.stock }}"
+                                            data-available="{{ product.available|yesno:'true,false' }}">
+                                        {% if LANGUAGE_CODE == 'ar' %}تعديل{% else %}Edit{% endif %}
+                                    </button>
+                                    <button class="text-button delete-product-button" type="button" data-id="{{ product.pk }}">
+                                        {% if LANGUAGE_CODE == 'ar' %}حذف{% else %}Delete{% endif %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6">{% if LANGUAGE_CODE == 'ar' %}لا توجد عطور في المتجر حتى الآن.{% else %}There are no perfumes in the store yet.{% endif %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="dashboard-panel content-editor-panel">
+        <div class="dashboard-panel-heading">
+            <div>
+                <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}محتوى الموقع{% else %}SITE CONTENT{% endif %}</p>
+                <h2>{% if LANGUAGE_CODE == 'ar' %}تعديل الصفحة الرئيسية{% else %}Edit the home page{% endif %}</h2>
+            </div>
+        </div>
+        <form id="storeContentForm" class="store-content-form">
+            {% csrf_token %}
+            <label>{% if LANGUAGE_CODE == 'ar' %}عنوان الواجهة بالعربية{% else %}Hero title in Arabic{% endif %}<input class="form-control" name="hero_title_ar" value="{{ page_content.hero_title_ar }}" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}عنوان الواجهة بالإنجليزية{% else %}Hero title in English{% endif %}<input class="form-control" name="hero_title_en" value="{{ page_content.hero_title_en }}" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}وصف الواجهة بالعربية{% else %}Hero text in Arabic{% endif %}<textarea class="form-control" name="hero_description_ar" rows="3" required>{{ page_content.hero_description_ar }}</textarea></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}وصف الواجهة بالإنجليزية{% else %}Hero text in English{% endif %}<textarea class="form-control" name="hero_description_en" rows="3" required>{{ page_content.hero_description_en }}</textarea></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}عنوان «قصتنا» بالعربية{% else %}About title in Arabic{% endif %}<input class="form-control" name="story_title_ar" value="{{ page_content.story_title_ar }}" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}عنوان «قصتنا» بالإنجليزية{% else %}About title in English{% endif %}<input class="form-control" name="story_title_en" value="{{ page_content.story_title_en }}" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}نص «قصتنا» بالعربية{% else %}About text in Arabic{% endif %}<textarea class="form-control" name="story_description_ar" rows="3" required>{{ page_content.story_description_ar }}</textarea></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}نص «قصتنا» بالإنجليزية{% else %}About text in English{% endif %}<textarea class="form-control" name="story_description_en" rows="3" required>{{ page_content.story_description_en }}</textarea></label>
+            <button class="primary-button" type="submit">{% if LANGUAGE_CODE == 'ar' %}حفظ محتوى الموقع{% else %}Save site content{% endif %}</button>
+        </form>
+    </section>
+    <p id="dashboardFeedback" class="dashboard-feedback" role="status" aria-live="polite"></p>
 </section>
+
+<dialog class="product-editor-dialog" id="productEditorDialog">
+    <form id="productEditorForm" class="product-editor-form">
+        {% csrf_token %}
+        <input type="hidden" name="id" id="productRecordId">
+        <div class="dashboard-panel-heading">
+            <div><p class="eyebrow">PERFUME</p><h2 id="productEditorTitle">{% if LANGUAGE_CODE == 'ar' %}عطر جديد{% else %}New perfume{% endif %}</h2></div>
+            <button class="dialog-close" type="button" id="closeProductDialog" aria-label="{% if LANGUAGE_CODE == 'ar' %}إغلاق{% else %}Close{% endif %}">×</button>
+        </div>
+        <div class="product-editor-grid">
+            <label>{% if LANGUAGE_CODE == 'ar' %}الاسم بالعربية{% else %}Arabic name{% endif %}<input class="form-control" name="name" required maxlength="200"></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}الاسم بالإنجليزية{% else %}English name{% endif %}<input class="form-control" name="name_en" required maxlength="200"></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}الوصف بالعربية{% else %}Arabic description{% endif %}<textarea class="form-control" name="description" rows="4" required></textarea></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}الوصف بالإنجليزية{% else %}English description{% endif %}<textarea class="form-control" name="description_en" rows="4" required></textarea></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}السعر (ريال){% else %}Price (SAR){% endif %}<input class="form-control" name="price" type="number" min="0.01" step="0.01" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}الكمية في المخزون{% else %}Stock quantity{% endif %}<input class="form-control" name="stock" type="number" min="0" step="1" required></label>
+            <label>{% if LANGUAGE_CODE == 'ar' %}صورة العطر{% else %}Perfume image{% endif %}<input class="form-control" name="image" type="file" accept="image/*"></label>
+            <label class="availability-field"><input name="available" type="checkbox" value="true" checked> {% if LANGUAGE_CODE == 'ar' %}عرض العطر في المتجر{% else %}Show this perfume in the store{% endif %}</label>
+        </div>
+        <p class="form-api-error" id="productEditorError" role="alert"></p>
+        <div class="dialog-actions">
+            <button class="primary-button" type="submit">{% if LANGUAGE_CODE == 'ar' %}حفظ العطر{% else %}Save perfume{% endif %}</button>
+            <button class="secondary-button" type="button" id="cancelProductDialog">{% if LANGUAGE_CODE == 'ar' %}إلغاء{% else %}Cancel{% endif %}</button>
+        </div>
+    </form>
+</dialog>
 {% endblock %}

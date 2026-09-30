@@ -32,7 +32,7 @@
             <h2>{% if LANGUAGE_CODE == 'ar' %}ملخص الطلب{% else %}Order summary{% endif %}</h2>
             {% for line in cart_lines %}
                 <div class="checkout-summary-item">
-                    <span>{{ line.product.name }} × {{ line.quantity }}</span>
+                    <span>{{ line.product.localized_name }} × {{ line.quantity }}</span>
                     <strong><bdi class="money" dir="ltr">SAR {{ line.line_total|unlocalize }}</bdi></strong>
                 </div>
             {% endfor %}
