@@ -94,13 +94,13 @@
                 </div>
 
                 <div class="modern-product-info">
-                    <p class="product-kicker">PERFUME COLLECTION</p>
+                    <p class="product-kicker">{% if LANGUAGE_CODE == 'ar' %}مجموعة العطور{% else %}PERFUME COLLECTION{% endif %}</p>
                     <h3><a href="{% url 'product_detail' product.id %}">{{ product.localized_name }}</a></h3>
                     <p class="product-description">{{ product.localized_description|truncatechars:100 }}</p>
 
                     <div class="product-footer">
                         <strong class="product-price"><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></strong>
-                        <form method="post" action="{% url 'cart_add' product.id %}">
+                        <form class="cart-add-form" method="post" action="{% url 'cart_add' product.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.path }}#collection">
                             <button class="product-action" type="submit" {% if not product.stock %}disabled{% endif %}>

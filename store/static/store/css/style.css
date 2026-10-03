@@ -848,6 +848,30 @@ html[dir="rtl"] .footer-grid > div:not(:first-child) {
 .message-success { border-color: #83b992; }
 .message-error { border-color: #d68a82; }
 
+.cart-toast {
+    position: fixed;
+    z-index: 1200;
+    inset-block-start: calc(88px + env(safe-area-inset-top));
+    left: 50%;
+    width: min(520px, calc(100vw - 32px));
+    padding: 13px 18px;
+    transform: translate(-50%, -12px);
+    border: 1px solid var(--line);
+    border-inline-start: 4px solid #83b992;
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+}
+.cart-toast[hidden] { display: none; }
+.cart-toast.is-visible { transform: translate(-50%, 0); opacity: 1; }
+.cart-toast.is-error { border-inline-start-color: #d68a82; }
+
 .commerce-shell { min-height: 55vh; }
 
 .commerce-heading { margin-bottom: 38px; }

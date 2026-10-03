@@ -4,9 +4,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from accounts.models import CustomerProfile
 from .forms import CheckoutForm
 from .models import Cart, CartItem, Order, OrderItem, Product, StoreContent
 
@@ -118,7 +120,10 @@ def cart_add(request, product_id):
         return redirect('home')
     product = get_object_or_404(Product, pk=product_id, available=True)
     if product.stock < 1:
-        messages.error(request, _localized_message(request, 'هذا المنتج غير متوفر حالياً.', 'This product is currently unavailable.'))
+        error_message = _localized_message(request, 'هذا المنتج غير متوفر حالياً.', 'This product is currently unavailable.')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'ok': False, 'message': error_message}, status=400)
+        messages.error(request, error_message)
         return redirect('home')
 
     if request.user.is_authenticated:
@@ -134,7 +139,19 @@ def cart_add(request, product_id):
         request.session[CART_SESSION_KEY] = cart
         request.session.modified = True
 
-    messages.success(request, _localized_message(request, 'تمت إضافة المنتج إلى السلة.', 'Product added to your cart.'))
+    success_message = _localized_message(request, 'تمت إضافة المنتج إلى السلة.', 'Product added to your cart.')
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.user.is_authenticated:
+            cart_item_count = CartItem.objects.filter(cart__user=request.user).aggregate(total=Sum('quantity'))['total'] or 0
+        else:
+            cart_item_count = sum(int(quantity) for quantity in _session_cart(request).values())
+        return JsonResponse({
+            'ok': True,
+            'message': success_message,
+            'cart_item_count': cart_item_count,
+        })
+
+    messages.success(request, success_message)
     next_url = request.POST.get('next', '')
     if next_url and url_has_allowed_host_and_scheme(
         next_url,
@@ -200,6 +217,7 @@ def checkout(request):
         return redirect('cart')
 
     subtotal, shipping_fee, total = _cart_totals(lines)
+    delivery_profile = getattr(request.user, 'customer_profile', None)
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
@@ -240,10 +258,26 @@ def checkout(request):
                 messages.error(request, _localized_message(request, 'تغير توفر أحد المنتجات. راجع السلة ثم حاول مجدداً.', 'An item’s availability changed. Review your cart and try again.'))
                 return redirect('cart')
 
+            CustomerProfile.objects.update_or_create(
+                user=request.user,
+                defaults={
+                    'full_name': form.cleaned_data['full_name'],
+                    'phone': form.cleaned_data['phone'],
+                    'city': form.cleaned_data['city'],
+                    'address': form.cleaned_data['address'],
+                },
+            )
+
             messages.success(request, _localized_message(request, 'تم تسجيل طلبك التجريبي بنجاح، ولم يتم تحصيل أي مبلغ.', 'Your demo order was placed. No payment was collected.'))
             return redirect('order_confirmation', order_id=order.pk)
     else:
-        form = CheckoutForm(initial={'full_name': request.user.get_full_name()})
+        profile = delivery_profile
+        form = CheckoutForm(initial={
+            'full_name': (profile.full_name if profile and profile.full_name else request.user.get_full_name()),
+            'phone': profile.phone if profile else '',
+            'city': profile.city if profile else '',
+            'address': profile.address if profile else '',
+        })
 
     return render(request, 'store/checkout.html', {
         'form': form,
@@ -251,6 +285,13 @@ def checkout(request):
         'subtotal': subtotal,
         'shipping_fee': shipping_fee,
         'total': total,
+        'has_saved_delivery_details': bool(
+            delivery_profile
+            and delivery_profile.full_name
+            and delivery_profile.phone
+            and delivery_profile.city
+            and delivery_profile.address
+        ),
     })
 
 

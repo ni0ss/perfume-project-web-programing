@@ -9,7 +9,7 @@
     <div class="commerce-heading">
         <p class="eyebrow">PERFUME</p>
         <h1>{% if LANGUAGE_CODE == 'ar' %}إتمام الطلب{% else %}Checkout{% endif %}</h1>
-        <p>{% if LANGUAGE_CODE == 'ar' %}أدخل بيانات التوصيل لتسجيل طلب تجريبي.{% else %}Enter delivery details to place a demo order.{% endif %}</p>
+        <p>{% if has_saved_delivery_details %}{% if LANGUAGE_CODE == 'ar' %}بيانات التوصيل محفوظة في حسابك ويمكنك تعديلها لهذا الطلب.{% else %}Your delivery details are saved to your account and can be edited for this order.{% endif %}{% else %}{% if LANGUAGE_CODE == 'ar' %}أدخل بيانات التوصيل الآن؛ سنحفظها في حسابك للطلبات القادمة.{% else %}Enter your delivery details now and we’ll save them to your account for future orders.{% endif %}{% endif %}</p>
     </div>
     <div class="commerce-layout checkout-layout">
         <form class="checkout-form" method="post">

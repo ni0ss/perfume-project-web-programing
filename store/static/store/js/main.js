@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editProduct: "تعديل بيانات العطر",
         loading: "أفكر في إجابة...",
         assistantFailed: "تعذر الحصول على إجابة الآن. حاول مرة أخرى.",
+        cartAddFailed: "تعذرت إضافة المنتج إلى السلة. حاول مرة أخرى.",
     } : {
         saved: "Changes saved.",
         saveFailed: "Could not save. Check the fields and try again.",
@@ -56,11 +57,63 @@ document.addEventListener("DOMContentLoaded", () => {
         editProduct: "Edit perfume",
         loading: "Thinking...",
         assistantFailed: "I could not get an answer. Please try again.",
+        cartAddFailed: "Could not add the item to your cart. Please try again.",
     };
 
     const csrfToken = () => document.querySelector("#csrfTokenSource input[name='csrfmiddlewaretoken']")?.value
         || document.querySelector("input[name='csrfmiddlewaretoken']")?.value
         || "";
+
+    const cartToast = document.getElementById("cartToast");
+    let cartToastTimer;
+    let cartToastHideTimer;
+    const showCartToast = (message, isError = false) => {
+        if (!cartToast) return;
+        window.clearTimeout(cartToastTimer);
+        window.clearTimeout(cartToastHideTimer);
+        cartToast.textContent = message;
+        cartToast.classList.toggle("is-error", isError);
+        cartToast.hidden = false;
+        window.requestAnimationFrame(() => cartToast.classList.add("is-visible"));
+        cartToastTimer = window.setTimeout(() => {
+            cartToast.classList.remove("is-visible");
+            cartToastHideTimer = window.setTimeout(() => { cartToast.hidden = true; }, 220);
+        }, 3200);
+    };
+
+    document.querySelectorAll(".cart-add-form").forEach(form => {
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            if (button?.disabled) return;
+            if (button) button.disabled = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": csrfToken(),
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json",
+                    },
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.ok) {
+                    throw new Error(result.message || labels.cartAddFailed);
+                }
+                document.querySelectorAll(".cart-count").forEach(count => {
+                    count.textContent = result.cart_item_count;
+                });
+                showCartToast(result.message);
+            } catch (error) {
+                showCartToast(error.message || labels.cartAddFailed, true);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        });
+    });
 
     async function apiRequest(url, method, body, json = false) {
         const headers = { "X-CSRFToken": csrfToken(), "Accept": "application/json" };

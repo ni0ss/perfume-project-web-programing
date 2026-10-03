@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PERFUME{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=20260930-1">
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=20261001-1">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -87,6 +87,8 @@
         </div>
     </header>
 
+    <div class="cart-toast" id="cartToast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
     <main>
         {% if messages %}
             <div class="messages-shell" role="status">
@@ -154,7 +156,7 @@
         </section>
     </div>
 
-    <script src="{% static 'store/js/main.js' %}?v=20260930-1"></script>
+    <script src="{% static 'store/js/main.js' %}?v=20261001-1"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from .forms import RegisterForm
+from .models import CustomerProfile
 from store.models import Cart, CartItem, Product
 from store.views import CART_SESSION_KEY
 
@@ -49,7 +50,14 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            user = form.save()
+            CustomerProfile.objects.create(
+                user=user,
+                full_name=form.cleaned_data['full_name'],
+                phone=form.cleaned_data['phone'],
+                city=form.cleaned_data['city'],
+                address=form.cleaned_data['address'],
+            )
             return redirect('login')
 
     else:

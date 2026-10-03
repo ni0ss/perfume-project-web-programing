@@ -18,7 +18,7 @@
             {% endif %}
         </div>
         <div class="product-detail-copy">
-            <p class="eyebrow">PERFUME COLLECTION</p>
+            <p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}مجموعة العطور{% else %}PERFUME COLLECTION{% endif %}</p>
             <h1>{{ product.localized_name }}</h1>
             <p class="product-detail-price"><bdi class="money" dir="ltr">SAR {{ product.price|unlocalize }}</bdi></p>
             <p class="product-detail-description">{{ product.localized_description|linebreaksbr }}</p>
@@ -29,7 +29,7 @@
                     {% if LANGUAGE_CODE == 'ar' %}نفد المخزون{% else %}Sold out{% endif %}
                 {% endif %}
             </p>
-            <form method="post" action="{% url 'cart_add' product.id %}">
+            <form class="cart-add-form" method="post" action="{% url 'cart_add' product.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button class="primary-button form-submit" type="submit" {% if not product.stock %}disabled{% endif %}>

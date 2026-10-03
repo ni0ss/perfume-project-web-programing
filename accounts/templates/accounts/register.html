@@ -9,7 +9,7 @@
     <div class="account-card">
         <p class="eyebrow">PERFUME</p>
         <h1>{% if LANGUAGE_CODE == 'ar' %}أنشئ حسابك{% else %}Create your account{% endif %}</h1>
-        <p>{% if LANGUAGE_CODE == 'ar' %}احتفظ بسلتك وتابع طلباتك من مكان واحد.{% else %}Save your cart and follow your orders in one place.{% endif %}</p>
+        <p>{% if LANGUAGE_CODE == 'ar' %}أدخل بيانات التوصيل مرة واحدة؛ سنحفظها في حسابك لتظهر تلقائياً عند طلباتك القادمة.{% else %}Add your delivery details once. We’ll save them to your account and prefill them for future orders.{% endif %}</p>
         <form class="account-form" method="post">
             {% csrf_token %}
             {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
