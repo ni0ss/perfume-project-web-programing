@@ -1,0 +1,552 @@
+{
+  "study": "Author-composed bilingual intent benchmark; no customer conversations or human participants.",
+  "model": "local-multinomial-nb-2.0",
+  "training_examples": 324,
+  "training_counts_by_intent_and_language": {
+    "greeting": {
+      "ar": 18,
+      "en": 18
+    },
+    "price": {
+      "ar": 18,
+      "en": 18
+    },
+    "delivery_order": {
+      "ar": 18,
+      "en": 18
+    },
+    "contact": {
+      "ar": 18,
+      "en": 18
+    },
+    "recommendation": {
+      "ar": 18,
+      "en": 18
+    },
+    "catalog": {
+      "ar": 18,
+      "en": 18
+    },
+    "store_info": {
+      "ar": 18,
+      "en": 18
+    },
+    "product_info": {
+      "ar": 18,
+      "en": 18
+    },
+    "other": {
+      "ar": 18,
+      "en": 18
+    }
+  },
+  "test_examples": 72,
+  "test_counts_by_intent": {
+    "greeting": 8,
+    "price": 8,
+    "delivery_order": 8,
+    "contact": 8,
+    "recommendation": 8,
+    "catalog": 8,
+    "store_info": 8,
+    "product_info": 8,
+    "other": 8
+  },
+  "overall": {
+    "naive_bayes": {
+      "accuracy": 0.9722222222222222,
+      "macro_precision": 0.9753086419753086,
+      "macro_recall": 0.9722222222222222,
+      "macro_f1": 0.9721132897603486,
+      "per_class": {
+        "catalog": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1": 0.9411764705882353,
+          "support": 8
+        },
+        "contact": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8
+        },
+        "delivery_order": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1": 0.9411764705882353,
+          "support": 8
+        },
+        "greeting": {
+          "precision": 1.0,
+          "recall": 0.875,
+          "f1": 0.9333333333333333,
+          "support": 8
+        },
+        "other": {
+          "precision": 1.0,
+          "recall": 0.875,
+          "f1": 0.9333333333333333,
+          "support": 8
+        },
+        "price": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8
+        },
+        "product_info": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8
+        },
+        "recommendation": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8
+        },
+        "store_info": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8
+        }
+      }
+    },
+    "rule_baseline": {
+      "accuracy": 0.3333333333333333,
+      "macro_precision": 0.42971781305114637,
+      "macro_recall": 0.3333333333333333,
+      "macro_f1": 0.2742971355374456,
+      "per_class": {
+        "catalog": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 8
+        },
+        "contact": {
+          "precision": 1.0,
+          "recall": 0.125,
+          "f1": 0.2222222222222222,
+          "support": 8
+        },
+        "delivery_order": {
+          "precision": 1.0,
+          "recall": 0.625,
+          "f1": 0.7692307692307693,
+          "support": 8
+        },
+        "greeting": {
+          "precision": 0.25,
+          "recall": 0.125,
+          "f1": 0.16666666666666666,
+          "support": 8
+        },
+        "other": {
+          "precision": 0.22857142857142856,
+          "recall": 1.0,
+          "f1": 0.3720930232558139,
+          "support": 8
+        },
+        "price": {
+          "precision": 1.0,
+          "recall": 0.25,
+          "f1": 0.4,
+          "support": 8
+        },
+        "product_info": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 8
+        },
+        "recommendation": {
+          "precision": 0.3888888888888889,
+          "recall": 0.875,
+          "f1": 0.5384615384615385,
+          "support": 8
+        },
+        "store_info": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 8
+        }
+      }
+    }
+  },
+  "by_language": {
+    "ar": {
+      "test_examples": 36,
+      "naive_bayes": {
+        "accuracy": 0.9722222222222222,
+        "macro_precision": 0.9777777777777777,
+        "macro_recall": 0.9722222222222222,
+        "macro_f1": 0.9717813051146384,
+        "per_class": {
+          "catalog": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1": 0.888888888888889,
+            "support": 4
+          },
+          "contact": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "delivery_order": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "greeting": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "support": 4
+          },
+          "other": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "price": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "product_info": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "recommendation": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "store_info": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          }
+        }
+      },
+      "rule_baseline": {
+        "accuracy": 0.3611111111111111,
+        "macro_precision": 0.39281045751633986,
+        "macro_recall": 0.3611111111111111,
+        "macro_f1": 0.28994708994708995,
+        "per_class": {
+          "catalog": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "contact": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "support": 4
+          },
+          "delivery_order": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "greeting": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "support": 4
+          },
+          "other": {
+            "precision": 0.23529411764705882,
+            "recall": 1.0,
+            "f1": 0.38095238095238093,
+            "support": 4
+          },
+          "price": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "product_info": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "recommendation": {
+            "precision": 0.3,
+            "recall": 0.75,
+            "f1": 0.4285714285714285,
+            "support": 4
+          },
+          "store_info": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          }
+        }
+      }
+    },
+    "en": {
+      "test_examples": 36,
+      "naive_bayes": {
+        "accuracy": 0.9722222222222222,
+        "macro_precision": 0.9777777777777777,
+        "macro_recall": 0.9722222222222222,
+        "macro_f1": 0.9717813051146384,
+        "per_class": {
+          "catalog": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "contact": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "delivery_order": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1": 0.888888888888889,
+            "support": 4
+          },
+          "greeting": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "other": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "support": 4
+          },
+          "price": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "product_info": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "recommendation": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          },
+          "store_info": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 4
+          }
+        }
+      },
+      "rule_baseline": {
+        "accuracy": 0.3055555555555556,
+        "macro_precision": 0.30246913580246915,
+        "macro_recall": 0.3055555555555556,
+        "macro_f1": 0.23299663299663298,
+        "per_class": {
+          "catalog": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "contact": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "delivery_order": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "support": 4
+          },
+          "greeting": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "other": {
+            "precision": 0.2222222222222222,
+            "recall": 1.0,
+            "f1": 0.3636363636363636,
+            "support": 4
+          },
+          "price": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6666666666666666,
+            "support": 4
+          },
+          "product_info": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "recommendation": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666,
+            "support": 4
+          },
+          "store_info": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          }
+        }
+      }
+    }
+  },
+  "naive_bayes_confusion_matrix": {
+    "catalog": {
+      "catalog": 8,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "contact": {
+      "catalog": 0,
+      "contact": 8,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "delivery_order": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 8,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "greeting": {
+      "catalog": 1,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 7,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "other": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 1,
+      "greeting": 0,
+      "other": 7,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "price": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 8,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "product_info": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 8,
+      "recommendation": 0,
+      "store_info": 0
+    },
+    "recommendation": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 8,
+      "store_info": 0
+    },
+    "store_info": {
+      "catalog": 0,
+      "contact": 0,
+      "delivery_order": 0,
+      "greeting": 0,
+      "other": 0,
+      "price": 0,
+      "product_info": 0,
+      "recommendation": 0,
+      "store_info": 8
+    }
+  },
+  "classifier_latency_ms": {
+    "measurement": "single local Python process; 10 repeated predictions per authored query; classifier only",
+    "median": 0.1795835,
+    "p95": 0.276625
+  },
+  "environment": {
+    "python": "3.13.5",
+    "django": "6.1"
+  },
+  "notes": [
+    "The benchmark was authored by the project team and is not a sample of real customer language.",
+    "The reported normalized scores are not a user-satisfaction measure.",
+    "The result is an internal reproducible evaluation and does not imply journal acceptance."
+  ]
+}
