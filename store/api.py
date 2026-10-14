@@ -85,4 +85,7 @@ class LocalAssistantView(APIView):
             return Response({"error": "Please keep your question under 500 characters."}, status=400)
 
         products = Product.objects.filter(available=True, stock__gt=0).order_by("price", "name")
-        return Response(answer_store_question(message, request.data.get("language"), products))
+        model = request.data.get("model")
+        if model is not None and not isinstance(model, str):
+            return Response({"error": "Please choose a supported local model."}, status=400)
+        return Response(answer_store_question(message, request.data.get("language"), products, model))

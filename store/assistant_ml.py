@@ -270,7 +270,7 @@ def classify_with_domain_cues(text: str, language: str) -> str | None:
         {"list", "browse", "display", "show", "see", "view", "offer", "have", "available", "availability", "stock", "range", "options", "choices", "catalog", "collection", "products", "items", "scents", "fragrances", "all", "العطور", "عطور", "منتجات", "المنتجات", "اصناف", "خيارات", "قائمة", "تشكيلة", "معروض", "المعروض", "متوفر", "متوفرة", "موجود", "الموجود", "عندكم", "ورني", "اعرض", "عرض", "اتصفح", "كل"}
     )
     store_info_terms = (
-        {"purpose", "goal", "idea", "project", "prototype", "demo", "platform", "website", "site", "application", "store", "shop", "الغرض", "هدف", "فكرة", "مشروع", "تجريبي", "نموذج", "منصة", "موقع", "المتجر", "التطبيق", "الخدمات", "يقدم", "وظيفة", "الغرض", "زائر"}
+        {"purpose", "goal", "idea", "project", "prototype", "demo", "platform", "website", "site", "application", "الغرض", "هدف", "فكرة", "مشروع", "تجريبي", "نموذج", "منصة", "موقع", "التطبيق", "الخدمات", "يقدم", "وظيفة", "زائر"}
     )
     out_of_scope_terms = (
         {"weather", "equation", "math", "poem", "poetry", "match", "game", "recipe", "cook", "cooking", "distance", "earth", "mars", "طقس", "معادلة", "رياضيات", "قصيدة", "شعر", "مباراة", "كبسة", "اطبخ", "طبخ", "وصفة", "دجاج", "عدس", "الارض", "المريخ"}
@@ -286,7 +286,7 @@ def classify_with_domain_cues(text: str, language: str) -> str | None:
         return "contact"
     if has_any(price_terms):
         return "price"
-    if has_any(store_info_terms) and (has_domain or has_any({"purpose", "goal", "idea", "project", "prototype", "demo", "الغرض", "هدف", "فكرة", "مشروع", "تجريبي", "نموذج"})):
+    if has_any(store_info_terms):
         return "store_info"
     if has_any(explicit_recommendation_terms) and has_domain:
         return "recommendation"

@@ -1,0 +1,47 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  ollama-models:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "(ollama show qwen2.5:1.5b >/dev/null 2>&1 || ollama pull qwen2.5:1.5b) && (ollama show qwen2.5:3b >/dev/null 2>&1 || ollama pull qwen2.5:3b)"
+    restart: "no"
+
+  web:
+    build: .
+    depends_on:
+      ollama-models:
+        condition: service_completed_successfully
+    environment:
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:3b
+      DJANGO_DATABASE_PATH: /data/db.sqlite3
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./db.sqlite3:/data/db.sqlite3
+      - ./media:/app/media
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

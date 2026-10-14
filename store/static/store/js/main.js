@@ -256,6 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const assistantMessages = document.getElementById("assistantMessages");
     const assistantForm = document.getElementById("assistantForm");
     const assistantInput = document.getElementById("assistantInput");
+    const assistantModel = document.getElementById("assistantModel");
 
     const addAssistantMessage = (message, isUser = false) => {
         const bubble = document.createElement("p");
@@ -289,6 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await apiRequest(assistant.dataset.apiUrl, "POST", {
                 message,
                 language: assistant.dataset.language,
+                model: assistantModel?.value,
             }, true);
             pending.textContent = result.answer || labels.assistantFailed;
         } catch (_) {

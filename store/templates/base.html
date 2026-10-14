@@ -149,6 +149,12 @@
             <div class="assistant-messages" id="assistantMessages" aria-live="polite">
                 <p class="assistant-message assistant-message-bot">{% if LANGUAGE_CODE == 'ar' %}مرحباً! أستطيع مساعدتك في اختيار عطر أو معرفة الأسعار ومعلومات الطلب.{% else %}Hello! I can help you choose a perfume, check prices, or explain orders.{% endif %}</p>
             </div>
+            <label class="assistant-model-label" for="assistantModel">{% if LANGUAGE_CODE == 'ar' %}النموذج المحلي{% else %}Local model{% endif %}
+                <select id="assistantModel" name="model">
+                    <option value="qwen2.5:3b">{% if LANGUAGE_CODE == 'ar' %}Qwen 2.5 · 3B (أقوى){% else %}Qwen 2.5 · 3B (stronger){% endif %}</option>
+                    <option value="qwen2.5:1.5b">{% if LANGUAGE_CODE == 'ar' %}Qwen 2.5 · 1.5B (أخف){% else %}Qwen 2.5 · 1.5B (lighter){% endif %}</option>
+                </select>
+            </label>
             <form class="assistant-form" id="assistantForm">
                 <input id="assistantInput" name="message" maxlength="500" autocomplete="off" required placeholder="{% if LANGUAGE_CODE == 'ar' %}اسأل عن عطر أو سعر...{% else %}Ask about a perfume or price...{% endif %}">
                 <button type="submit" aria-label="{% if LANGUAGE_CODE == 'ar' %}إرسال{% else %}Send{% endif %}">↑</button>
@@ -156,7 +162,7 @@
         </section>
     </div>
 
-    <script src="{% static 'store/js/main.js' %}?v=20261001-1"></script>
+    <script src="{% static 'store/js/main.js' %}?v=20261014-1"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
