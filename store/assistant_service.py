@@ -12,8 +12,8 @@ from .assistant_ml import MODEL_VERSION, classify_with_domain_cues, detect_langu
 
 
 LOCAL_MODELS = {
-    "qwen2.5:1.5b": "Qwen 2.5 (خفيف)",
-    "qwen2.5:3b": "Qwen 2.5 (أقوى)",
+    "hermes3:3b": "Hermes 3 (3B)",
+    "qwen3:4b": "Qwen 3 (4B)",
 }
 ARABIC_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 ARITHMETIC_OPERATORS = {
@@ -35,6 +35,10 @@ def _answer_arithmetic(message, language):
     )
     for pattern, replacement in replacements:
         expression = re.sub(pattern, replacement, expression, flags=re.IGNORECASE)
+    # Strip common Arabic question/filler words after translating the
+    # operation words. For example, "كم حاصل ضرب ١٠ في ١٠؟" becomes
+    # "* 10 * 10" before the leading operation marker is normalized below.
+    expression = re.sub(r"\b(?:كم|حاصل|ناتج|ما|هو|هي)\b", " ", expression)
     expression = re.sub(
         r"\b(?:what\s+is|what's|calculate|compute|how\s+much\s+is|equals?|result|show|answer)\b|كم\s+يساوي|ما\s+ناتج|احسب|الناتج|يساوي",
         " ", expression, flags=re.IGNORECASE,
@@ -42,6 +46,7 @@ def _answer_arithmetic(message, language):
     expression = expression.replace("×", "*").replace("÷", "/").replace("−", "-")
     expression = re.sub(r"[^0-9.+*/()\-\s]", " ", expression)
     expression = expression.strip().rstrip(".").strip()
+    expression = re.sub(r"^[*/+]\s*", "", expression)
     if not expression or not re.search(r"[+*/-]", expression) or len(expression) > 120:
         return None
 
@@ -69,9 +74,9 @@ def _answer_arithmetic(message, language):
 def _ask_local_model(message, language, model, products):
     """Ask Ollama without sending the prompt outside the local machine."""
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
-    selected_model = model if model in LOCAL_MODELS else os.environ.get("OLLAMA_MODEL", "qwen2.5:3b")
+    selected_model = model if model in LOCAL_MODELS else os.environ.get("OLLAMA_MODEL", "qwen3:4b")
     if selected_model not in LOCAL_MODELS:
-        selected_model = "qwen2.5:3b"
+        selected_model = "qwen3:4b"
     language_instruction = (
         "أجب باللغة العربية الواضحة وباختصار. للمعلومات العامة، لا تخترع حقائق أو مصطلحات؛ إذا لم تكن متأكدًا فقل ذلك."
         if language == "ar" else

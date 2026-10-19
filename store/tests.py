@@ -5,6 +5,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from .assistant_ml import classify_intent, normalize_text, tokenize
+from .assistant_service import _answer_arithmetic
 from .models import Product, StoreContent
 
 
@@ -82,6 +83,16 @@ class LocalAssistantAPITests(TestCase):
         self.assertIn("White Musk", response.data["answer"])
         self.assertEqual(response.data["intent"], "price")
         self.assertEqual(response.data["classifier"], "local-hybrid-nb-2.1")
+
+    def test_arithmetic_is_answered_locally_in_english_and_arabic(self):
+        examples = (
+            ("What is 10 times 10?", "en", "The result is 100."),
+            ("كم حاصل ضرب ١٠ في ١٠؟", "ar", "الناتج هو 100."),
+            ("١٠ ضرب ١٠", "ar", "الناتج هو 100."),
+        )
+        for message, language, expected in examples:
+            with self.subTest(message=message):
+                self.assertEqual(_answer_arithmetic(message, language), expected)
 
     def test_contact_answer_does_not_expose_unverified_demo_contact_details(self):
         for message, language in (("How can I contact you?", "en"), ("كيف اتواصل معكم؟", "ar")):

@@ -19,8 +19,8 @@ from urllib.request import Request, urlopen
 
 OLLAMA_URL = os.environ.get("OLLAMA_HOST_URL", "http://127.0.0.1:11434").rstrip("/")
 MODELS = {
-    "qwen2.5:3b": "MODEL_3B_OK",
-    "qwen2.5:1.5b": "MODEL_1_5B_OK",
+    "qwen3:4b": "QWEN3_4B_OK",
+    "hermes3:3b": "HERMES3_3B_OK",
 }
 TIMEOUT = int(os.environ.get("OLLAMA_TEST_TIMEOUT_SECONDS", "180"))
 

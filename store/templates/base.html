@@ -150,8 +150,8 @@
             </div>
             <label class="assistant-model-label" for="assistantModel">{% if LANGUAGE_CODE == 'ar' %}النموذج المحلي{% else %}Local model{% endif %}
                 <select id="assistantModel" name="model">
-                    <option value="qwen2.5:3b">{% if LANGUAGE_CODE == 'ar' %}Qwen 2.5 · 3B (أقوى){% else %}Qwen 2.5 · 3B (stronger){% endif %}</option>
-                    <option value="qwen2.5:1.5b">{% if LANGUAGE_CODE == 'ar' %}Qwen 2.5 · 1.5B (أخف){% else %}Qwen 2.5 · 1.5B (lighter){% endif %}</option>
+                    <option value="qwen3:4b">Qwen 3 · 4B</option>
+                    <option value="hermes3:3b">Hermes 3 · 3B</option>
                 </select>
             </label>
             <form class="assistant-form" id="assistantForm">

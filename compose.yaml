@@ -22,7 +22,7 @@ services:
       - ollama_data:/root/.ollama
     entrypoint: ["/bin/sh", "-c"]
     command:
-      - "(ollama show qwen2.5:1.5b >/dev/null 2>&1 || ollama pull qwen2.5:1.5b) && (ollama show qwen2.5:3b >/dev/null 2>&1 || ollama pull qwen2.5:3b)"
+      - "(ollama show hermes3:3b >/dev/null 2>&1 || ollama pull hermes3:3b) && (ollama show qwen3:4b >/dev/null 2>&1 || ollama pull qwen3:4b)"
     restart: "no"
 
   web:
@@ -34,7 +34,7 @@ services:
       DJANGO_DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: qwen2.5:3b
+      OLLAMA_MODEL: qwen3:4b
       OLLAMA_REQUEST_TIMEOUT_SECONDS: "120"
       DJANGO_DATABASE_PATH: /data/db.sqlite3
     ports:
