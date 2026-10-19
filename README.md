@@ -135,9 +135,24 @@ The Compose file sets these environment variables for the web service:
 | `DJANGO_ALLOWED_HOSTS` | Hostnames accepted by Django. | `localhost,127.0.0.1,web` |
 | `OLLAMA_BASE_URL` | Address of the Ollama service from inside Docker. | `http://ollama:11434` |
 | `OLLAMA_MODEL` | Default model for assistant requests. | `qwen2.5:3b` |
+| `OLLAMA_REQUEST_TIMEOUT_SECONDS` | Maximum wait for a local model response before the assistant falls back to its unavailable message. | `120` |
 | `DJANGO_DATABASE_PATH` | SQLite database file path inside the container. | `/data/db.sqlite3` |
 
 These defaults are intended for local coursework and demonstration, not for deploying a public production website. Configure production security settings before exposing the application to the internet.
+
+## Use with VS Code
+
+Open the `perfume-project` folder in VS Code. The workspace `.vscode/settings.json` enables BYOK models in the current chat agent host and points the official Ollama extension at the local Ollama endpoint. After opening the folder, reload the VS Code window if prompted, start the Docker services as described above, and confirm both Qwen models are listed:
+
+```bash
+docker compose exec ollama ollama list
+```
+
+Open the Chat view, start a new chat, choose an Ollama model (for example, `qwen2.5:1.5b` or `qwen2.5:3b`), and use **Ask** for ordinary questions. A model appearing in the picker only confirms discovery, so verify that a prompt receives a response. On the tested computer, VS Code discovered both models and its extension sent a prompt to `qwen2.5:3b`, but the Ask response did not appear after several minutes. The extension also reported that Ollama was using a 4K context and recommended at least 64K; this VS Code path therefore remains unverified for successful replies on that device. Try `qwen2.5:1.5b`, follow the extension's context-size guidance, then start a new chat and verify a short prompt before presenting this integration as working. For code-editing Agent tasks, Qwen 2.5 3B may be unreliable; Ollama's extension warns about tool use for this model. See [docs/architecture.md](docs/architecture.md) and [research/methodology_and_results.md](research/methodology_and_results.md) for architecture and reproducible evaluation details.
+
+VS Code chat through a local Ollama model can work offline after the extension, VS Code, Docker image, and model files are already installed. Copilot features that depend on GitHub services (including some semantic search, embeddings, and inline code completion) still need connectivity and are not part of the local model path. To use the store's exact assistant routing from a VS Code terminal, call the local Django API at `http://127.0.0.1:8000/api/assistant/`; the Chat view talks directly to the selected Ollama model and does not run the website's intent or catalogue logic.
+
+For direct Django work, select the existing `venv/bin/python` interpreter on macOS/Linux or `venv\Scripts\python.exe` on Windows; a fresh checkout can create the virtual environment using the commands in **Run Django without Docker**. The integrated terminal can run the Docker Compose commands in this guide.
 
 ## API endpoints
 
@@ -167,7 +182,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-On Windows PowerShell, activate the environment with `venv\\Scripts\\Activate.ps1`. To use the Ollama-backed assistant in this mode, install and run Ollama separately, download one of the model names above, and configure the application to reach the local Ollama server.
+On Windows PowerShell, activate the environment with `venv\Scripts\Activate.ps1`. To use the Ollama-backed assistant in this mode, install and run Ollama separately, download one of the model names above, and configure the application to reach the local Ollama server.
 
 ## Troubleshooting
 
@@ -183,4 +198,5 @@ On Windows PowerShell, activate the environment with `venv\\Scripts\\Activate.ps
 - The AI models run locally through Ollama; assistant prompts are not sent to a hosted AI API by this configuration.
 - The model setup needs internet only if Docker images or model files are not already available locally. No new facts from the internet are available during offline use.
 - A small local model may produce incomplete or inaccurate general answers. Verify important answers independently.
+- Store contact details are deliberately shown as unconfigured demo content; add the store’s verified contact information before presenting the site publicly.
 - The site is an educational project. Its sample checkout does not collect payments and its development Docker configuration is not hardened for public production use.

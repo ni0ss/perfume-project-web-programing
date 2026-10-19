@@ -14,5 +14,6 @@ __pycache__/
 # macOS
 .DS_Store
 
-# IDE
-.vscode/
+# IDE (keep the shared workspace settings; ignore editor-local files)
+.vscode/*
+!.vscode/settings.json

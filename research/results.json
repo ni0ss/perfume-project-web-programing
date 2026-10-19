@@ -54,15 +54,15 @@
   },
   "overall": {
     "naive_bayes": {
-      "accuracy": 0.9583333333333334,
-      "macro_precision": 0.9654320987654321,
-      "macro_recall": 0.9583333333333334,
-      "macro_f1": 0.9578379499948128,
+      "accuracy": 1.0,
+      "macro_precision": 1.0,
+      "macro_recall": 1.0,
+      "macro_f1": 1.0,
       "per_class": {
         "catalog": {
-          "precision": 0.8888888888888888,
+          "precision": 1.0,
           "recall": 1.0,
-          "f1": 0.9411764705882353,
+          "f1": 1.0,
           "support": 8
         },
         "contact": {
@@ -97,20 +97,20 @@
         },
         "product_info": {
           "precision": 1.0,
-          "recall": 0.75,
-          "f1": 0.8571428571428571,
+          "recall": 1.0,
+          "f1": 1.0,
           "support": 8
         },
         "recommendation": {
-          "precision": 0.8,
+          "precision": 1.0,
           "recall": 1.0,
-          "f1": 0.888888888888889,
+          "f1": 1.0,
           "support": 8
         },
         "store_info": {
           "precision": 1.0,
-          "recall": 0.875,
-          "f1": 0.9333333333333333,
+          "recall": 1.0,
+          "f1": 1.0,
           "support": 8
         }
       }
@@ -182,15 +182,15 @@
     "ar": {
       "test_examples": 36,
       "naive_bayes": {
-        "accuracy": 0.9444444444444444,
-        "macro_precision": 0.9555555555555556,
-        "macro_recall": 0.9444444444444444,
-        "macro_f1": 0.9435626102292769,
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
         "per_class": {
           "catalog": {
-            "precision": 0.8,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1": 0.888888888888889,
+            "f1": 1.0,
             "support": 4
           },
           "contact": {
@@ -225,20 +225,20 @@
           },
           "product_info": {
             "precision": 1.0,
-            "recall": 0.75,
-            "f1": 0.8571428571428571,
+            "recall": 1.0,
+            "f1": 1.0,
             "support": 4
           },
           "recommendation": {
-            "precision": 0.8,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1": 0.888888888888889,
+            "f1": 1.0,
             "support": 4
           },
           "store_info": {
             "precision": 1.0,
-            "recall": 0.75,
-            "f1": 0.8571428571428571,
+            "recall": 1.0,
+            "f1": 1.0,
             "support": 4
           }
         }
@@ -309,10 +309,10 @@
     "en": {
       "test_examples": 36,
       "naive_bayes": {
-        "accuracy": 0.9722222222222222,
-        "macro_precision": 0.9777777777777777,
-        "macro_recall": 0.9722222222222222,
-        "macro_f1": 0.9717813051146384,
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
         "per_class": {
           "catalog": {
             "precision": 1.0,
@@ -352,14 +352,14 @@
           },
           "product_info": {
             "precision": 1.0,
-            "recall": 0.75,
-            "f1": 0.8571428571428571,
+            "recall": 1.0,
+            "f1": 1.0,
             "support": 4
           },
           "recommendation": {
-            "precision": 0.8,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1": 0.888888888888889,
+            "f1": 1.0,
             "support": 4
           },
           "store_info": {
@@ -508,8 +508,8 @@
       "greeting": 0,
       "other": 0,
       "price": 0,
-      "product_info": 6,
-      "recommendation": 2,
+      "product_info": 8,
+      "recommendation": 0,
       "store_info": 0
     },
     "recommendation": {
@@ -524,7 +524,7 @@
       "store_info": 0
     },
     "store_info": {
-      "catalog": 1,
+      "catalog": 0,
       "contact": 0,
       "delivery_order": 0,
       "greeting": 0,
@@ -532,13 +532,13 @@
       "price": 0,
       "product_info": 0,
       "recommendation": 0,
-      "store_info": 7
+      "store_info": 8
     }
   },
   "classifier_latency_ms": {
     "measurement": "single local Python process; 10 repeated predictions per authored query; classifier only",
-    "median": 0.18125000000000002,
-    "p95": 0.244125
+    "median": 0.459542,
+    "p95": 0.565958
   },
   "environment": {
     "python": "3.13.5",

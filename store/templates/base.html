@@ -124,8 +124,7 @@
 
             <div>
                 <h3>{% if LANGUAGE_CODE == 'ar' %}تواصل{% else %}Contact{% endif %}</h3>
-                <p>+966 50 123 4567</p>
-                <p>Naif7iqul@gmail.com</p>
+                <p>{% if LANGUAGE_CODE == 'ar' %}بيانات التواصل التجريبية غير متاحة حالياً.{% else %}Demo store contact details are not configured yet.{% endif %}</p>
             </div>
         </div>
 

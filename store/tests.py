@@ -83,6 +83,19 @@ class LocalAssistantAPITests(TestCase):
         self.assertEqual(response.data["intent"], "price")
         self.assertEqual(response.data["classifier"], "local-hybrid-nb-2.1")
 
+    def test_contact_answer_does_not_expose_unverified_demo_contact_details(self):
+        for message, language in (("How can I contact you?", "en"), ("كيف اتواصل معكم؟", "ar")):
+            with self.subTest(language=language):
+                response = self.client.post(
+                    "/api/assistant/",
+                    {"message": message, "language": language},
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("not been configured" if language == "en" else "غير مهيأة", response.data["answer"])
+                self.assertNotIn("Naif7iqul", response.data["answer"])
+                self.assertNotIn("+966", response.data["answer"])
+
     def test_assistant_rejects_empty_non_text_and_oversized_input(self):
         for payload in ({"message": "   "}, {"message": 42}, {"message": "x" * 501}):
             with self.subTest(payload_type=type(payload["message"]).__name__):

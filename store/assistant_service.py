@@ -102,7 +102,11 @@ def _ask_local_model(message, language, model, products):
         method="POST",
     )
     try:
-        with urlopen(request, timeout=45) as response:
+        try:
+            request_timeout = max(10, int(os.environ.get("OLLAMA_REQUEST_TIMEOUT_SECONDS", "120")))
+        except ValueError:
+            request_timeout = 120
+        with urlopen(request, timeout=request_timeout) as response:
             result = json.loads(response.read().decode("utf-8"))
         answer = result.get("message", {}).get("content", "").strip()
         if answer:
@@ -159,9 +163,9 @@ def answer_store_question(message, requested_language, products, requested_model
         )
     elif intent == "contact":
         answer = (
-            "تقدر تتواصل معنا على الرقم +966 50 123 4567 أو البريد Naif7iqul@gmail.com."
+            "بيانات التواصل مع هذا المتجر التجريبي غير مهيأة بعد. يرجى مراجعة قسم التواصل أسفل الصفحة."
             if language == "ar"
-            else "You can contact us at +966 50 123 4567 or Naif7iqul@gmail.com."
+            else "Contact details for this demo store have not been configured. Please see the Contact section at the bottom of the page."
         )
     elif intent == "recommendation":
         selected = rank_products(products, message)[:3]
