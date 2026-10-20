@@ -10,6 +10,7 @@ A bilingual (English and Arabic) educational perfume e-commerce website built wi
 - [Technology](#technology)
 - [How the Docker and local AI setup was built](#how-the-docker-and-local-ai-setup-was-built)
 - [Prerequisites](#prerequisites)
+- [One-command setup on another computer](#one-command-setup-on-another-computer)
 - [First-time setup](#first-time-setup-internet-required)
 - [Run offline](#run-the-project-offline)
 - [Try the assistant](#try-the-assistant)
@@ -60,6 +61,19 @@ The main project files for this setup are `Dockerfile`, `compose.yaml`, `config/
 - Docker Desktop / Docker Engine running.
 - About 5 GB of free space for both model files, in addition to Docker images and application data. Actual storage use varies by platform and image version.
 - Internet access for the initial image and model downloads only.
+
+## One-command setup on another computer
+
+Copy or extract the **entire project folder** to the other computer. Keep `compose.yaml`, `Dockerfile`, the Django source folders, `db.sqlite3`, and `media/` together. The Ollama models are stored in a Docker volume and are not included in the project folder, so the new computer downloads them during its first setup.
+
+Install Docker Desktop first and start it. Installing Docker itself is an operating-system-level step and is deliberately not automated by these project scripts; it may require administrator approval and differs between macOS, Windows, and Linux. The setup scripts then build the web image, start Ollama, download any missing models, start the website, list the models, and open the site. Internet access is required the first time, and both model downloads can take a while.
+
+- **macOS/Linux:** from Terminal, open the project folder and run `./setup.sh`. If macOS reports that the script is not executable, run `chmod +x setup.sh` once, then run `./setup.sh`.
+- **Windows:** open PowerShell in the project folder and run `powershell -ExecutionPolicy Bypass -File .\setup.ps1`.
+
+When setup completes, the store opens at <http://localhost:8000/en/>. On later runs, start Docker Desktop and run the same script again; Compose reuses the already downloaded images and models. To stop the project while keeping data, run `docker compose down` from the project folder. Do not run `docker compose down --volumes` if you want to keep the downloaded models.
+
+This is reproducible local setup using Infrastructure as Code: `compose.yaml` declares the services and their connections, while the scripts automate the setup steps. The project folder must still be copied to each computer, and the first setup on each computer needs internet to download its Docker images and Ollama models.
 
 ## First-time setup (internet required)
 
