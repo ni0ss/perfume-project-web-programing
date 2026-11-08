@@ -59,6 +59,9 @@ class StoreBrowserSmokeTests(StaticLiveServerTestCase):
         add_button = WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".cart-add-form button[type='submit']"))
         )
+        self.browser.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", add_button
+        )
         add_button.click()
 
         WebDriverWait(self.browser, 10).until(
