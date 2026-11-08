@@ -60,9 +60,9 @@ class StoreBrowserSmokeTests(StaticLiveServerTestCase):
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".cart-add-form button[type='submit']"))
         )
         self.browser.execute_script(
-            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", add_button
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'}); arguments[0].click();",
+            add_button,
         )
-        add_button.click()
 
         WebDriverWait(self.browser, 10).until(
             lambda browser: browser.find_element(By.CSS_SELECTOR, ".cart-count").text.strip() == "1"
