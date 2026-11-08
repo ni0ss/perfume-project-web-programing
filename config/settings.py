@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 import os
+import django
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +22,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-j14o(743nrecaod5l^&y*wfyd$b^bnr4-mjv)_679du@z^j&*-")
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "1").lower() in ("1", "true", "yes")
+
+# Local development stays convenient; a production deployment must supply its
+# own secret and explicitly turn DEBUG off.
+DEBUG = env_bool("DJANGO_DEBUG", True)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
+if not DEBUG and (not os.environ.get("DJANGO_SECRET_KEY") or SECRET_KEY.startswith("django-insecure-")):
+    raise ImproperlyConfigured("Set a strong DJANGO_SECRET_KEY before running with DJANGO_DEBUG=0.")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+# Production defaults assume TLS is terminated by the application host or a
+# trusted reverse proxy. Keep these values configurable for deployment hosts.
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", not DEBUG)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", not DEBUG)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+if env_bool("DJANGO_USE_X_FORWARDED_PROTO", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition
@@ -134,11 +159,31 @@ STATIC_URL = "static/"
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
+email_backend = os.environ.get(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend",
+)
+email_options = {
+    "host": os.environ.get("DJANGO_EMAIL_HOST", "localhost"),
+    "port": int(os.environ.get("DJANGO_EMAIL_PORT", "25")),
+    "username": os.environ.get("DJANGO_EMAIL_HOST_USER", ""),
+    "password": os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", ""),
+    "use_tls": env_bool("DJANGO_EMAIL_USE_TLS", False),
+    "use_ssl": env_bool("DJANGO_EMAIL_USE_SSL", False),
 }
+# Django 6.1 moved backend configuration to MAILERS. Keep compatibility with
+# the project's supported Django 4.2–6.0 range through the legacy settings.
+if django.VERSION >= (6, 1):
+    MAILERS = {"default": {"BACKEND": email_backend, "OPTIONS": email_options}}
+else:
+    EMAIL_BACKEND = email_backend
+    EMAIL_HOST = email_options["host"]
+    EMAIL_PORT = email_options["port"]
+    EMAIL_HOST_USER = email_options["username"]
+    EMAIL_HOST_PASSWORD = email_options["password"]
+    EMAIL_USE_TLS = email_options["use_tls"]
+    EMAIL_USE_SSL = email_options["use_ssl"]
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "webmaster@localhost")
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -153,4 +198,25 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'assistant': '30/hour',
+    },
 }
+
+cache_url = os.environ.get("CACHE_URL", "").strip()
+if cache_url:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": cache_url,
+            "KEY_PREFIX": "perfume",
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "perfume-project-local",
+            "TIMEOUT": 300,
+        }
+    }

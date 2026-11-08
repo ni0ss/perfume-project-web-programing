@@ -1,4 +1,13 @@
 services:
+  cache:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   ollama:
     image: ollama/ollama:latest
     ports:
@@ -28,6 +37,8 @@ services:
   web:
     build: .
     depends_on:
+      cache:
+        condition: service_healthy
       ollama-models:
         condition: service_completed_successfully
     environment:
@@ -37,6 +48,7 @@ services:
       OLLAMA_MODEL: qwen3:4b
       OLLAMA_REQUEST_TIMEOUT_SECONDS: "120"
       DJANGO_DATABASE_PATH: /data/db.sqlite3
+      CACHE_URL: redis://cache:6379/1
     ports:
       - "8000:8000"
     volumes:

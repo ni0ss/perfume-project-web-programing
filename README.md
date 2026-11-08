@@ -8,6 +8,7 @@ A bilingual (English and Arabic) educational perfume e-commerce website built wi
 
 - [Features](#features)
 - [Technology](#technology)
+- [CS50 Web Weeks 7 and 8](#cs50-web-weeks-7-and-8)
 - [How the Docker and local AI setup was built](#how-the-docker-and-local-ai-setup-was-built)
 - [Prerequisites](#prerequisites)
 - [One-command setup on another computer](#one-command-setup-on-another-computer)
@@ -17,6 +18,7 @@ A bilingual (English and Arabic) educational perfume e-commerce website built wi
 - [Project configuration](#project-configuration)
 - [API endpoints](#api-endpoints)
 - [Run Django without Docker](#run-django-without-docker)
+- [Run tests](#run-tests)
 - [Troubleshooting](#troubleshooting)
 - [Limitations and privacy](#limitations-and-privacy)
 
@@ -37,6 +39,7 @@ A bilingual (English and Arabic) educational perfume e-commerce website built wi
 - **Local inference server:** Ollama.
 - **Language models:** Qwen 3 4B and Hermes 3 3B, served locally by Ollama.
 - **Database:** SQLite for this educational project.
+- **Shared cache:** Redis in Docker Compose; local-memory cache when `CACHE_URL` is not set.
 
 ## How the Docker and local AI setup was built
 
@@ -45,8 +48,9 @@ The Docker setup packages the web application and runs Ollama as a separate loca
 The setup consists of:
 
 1. **`Dockerfile`** starts from Python 3.12, installs the packages listed in `requirements.txt`, copies the Django source into the image, and starts Django after applying database migrations.
-2. **`compose.yaml`** defines three services:
+2. **`compose.yaml`** defines four services:
    - `web`: builds and runs the Django site on port `8000`.
+   - `cache`: provides shared, disposable Redis cache data for the catalog API and assistant rate limit.
    - `ollama`: runs the local Ollama server and keeps downloaded model files in the `ollama_data` volume.
    - `ollama-models`: waits for Ollama, checks whether each required model is already available, and downloads it only when it is missing. It must finish before the web service starts.
 3. **Persistent data:** Ollama models are stored in a named Docker volume. The existing SQLite database and media directory are mounted from the project folder.
@@ -54,6 +58,10 @@ The setup consists of:
 5. **Model selection:** the assistant interface lets the user choose Qwen 3 4B (the default) or Hermes 3 3B. Both are stored in the persistent Ollama volume.
 
 The main project files for this setup are `Dockerfile`, `compose.yaml`, `config/settings.py`, `store/api.py`, `store/assistant_service.py`, `store/assistant_ml.py`, and `store/templates/base.html`.
+
+## CS50 Web Weeks 7 and 8
+
+The project applies Django tests, a Selenium storefront flow, GitHub Actions, Docker image builds, shared caching, API throttling, catalog indexing, and production security settings. The mapping, demo steps, and the parts that need a larger deployment are documented in [docs/week7-week8.md](docs/week7-week8.md).
 
 ## Prerequisites
 
@@ -151,8 +159,10 @@ The Compose file sets these environment variables for the web service:
 | `OLLAMA_MODEL` | Default model for assistant requests. | `qwen3:4b` |
 | `OLLAMA_REQUEST_TIMEOUT_SECONDS` | Maximum wait for a local model response before the assistant falls back to its unavailable message. | `120` |
 | `DJANGO_DATABASE_PATH` | SQLite database file path inside the container. | `/data/db.sqlite3` |
+| `CACHE_URL` | Shared Django cache URL. Compose uses Redis; local runs fall back to in-process memory. | `redis://cache:6379/1` |
 
 These defaults are intended for local coursework and demonstration, not for deploying a public production website. Configure production security settings before exposing the application to the internet.
+For production, set `DJANGO_DEBUG=0`, a strong unique `DJANGO_SECRET_KEY`, the deployed host and CSRF origins, and TLS-related settings. See `.env.example` and the [Week 8 application note](docs/week7-week8.md).
 
 ## Use with VS Code
 
@@ -197,6 +207,23 @@ python manage.py runserver
 ```
 
 On Windows PowerShell, activate the environment with `venv\Scripts\Activate.ps1`. To use the Ollama-backed assistant in this mode, install and run Ollama separately, download one of the model names above, and configure the application to reach the local Ollama server.
+
+## Run tests
+
+Install the development dependencies for Selenium, then run the Django suite:
+
+```bash
+pip install -r requirements-dev.txt
+python manage.py test
+```
+
+With Google Chrome installed, run the browser test as well:
+
+```bash
+RUN_BROWSER_TESTS=1 python manage.py test e2e
+```
+
+On Windows PowerShell, use `$env:RUN_BROWSER_TESTS = "1"` before the browser-test command. GitHub Actions installs Chrome and ChromeDriver and runs both suites automatically.
 
 ## Troubleshooting
 

@@ -1,12 +1,14 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.core.cache import cache
+from django.test import Client, TestCase
+from django.urls import reverse
 from rest_framework.test import APIClient
 
 from .assistant_ml import classify_intent, normalize_text, tokenize
 from .assistant_service import _answer_arithmetic
-from .models import Product, StoreContent
+from .models import Cart, CartItem, Order, OrderItem, Product, StoreContent
 
 
 class LocalIntentClassifierTests(TestCase):
@@ -116,6 +118,7 @@ class LocalAssistantAPITests(TestCase):
 
 class StoreAPIPermissionTests(TestCase):
     def setUp(self):
+        cache.clear()
         Product.objects.create(
             name="عنبر الليل",
             name_en="Night Amber",
@@ -161,6 +164,7 @@ class StoreAPIPermissionTests(TestCase):
         )
         self.assertEqual(updated.status_code, 200)
         self.assertEqual(StoreContent.objects.get(pk=1).hero_title_en, "A New Scent Story")
+        self.assertEqual(StoreContent.get_solo().hero_title_en, "A New Scent Story")
 
         created = self.client.post(
             "/api/products/",
@@ -176,3 +180,120 @@ class StoreAPIPermissionTests(TestCase):
         )
         self.assertEqual(created.status_code, 201)
         self.assertTrue(Product.objects.filter(name_en="Evening Rose").exists())
+
+
+class StoreJourneyTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.product = Product.objects.create(
+            name="عطر الاختبار",
+            name_en="Test Fragrance",
+            description="وصف آمن",
+            description_en="A calm fragrance",
+            price=Decimal("125.00"),
+            stock=3,
+        )
+
+    def test_home_page_escapes_untrusted_product_text(self):
+        self.product.name_en = "<script>alert('xss')</script>"
+        self.product.description_en = "<img src=x onerror=alert(1)>"
+        self.product.save(update_fields=("name_en", "description_en"))
+
+        response = self.client.get("/en/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "<script>alert('xss')</script>", status_code=200)
+        self.assertContains(response, "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;")
+
+    def test_cart_add_requires_csrf_token(self):
+        client = Client(enforce_csrf_checks=True)
+        client.get("/en/")
+        token = client.cookies["csrftoken"].value
+        url = reverse("cart_add", args=(self.product.pk,))
+
+        rejected = client.post(url)
+        accepted = client.post(url, HTTP_X_CSRFTOKEN=token)
+
+        self.assertEqual(rejected.status_code, 403)
+        self.assertEqual(accepted.status_code, 302)
+        self.assertEqual(client.session["perfume_cart"][str(self.product.pk)], 1)
+
+    def test_checkout_records_demo_order_decrements_stock_and_empties_cart(self):
+        shopper = get_user_model().objects.create_user(
+            username="checkout-shopper", password="Safe-Test-Pass-941!"
+        )
+        cart = Cart.objects.create(user=shopper)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=2)
+        self.client.force_login(shopper)
+
+        response = self.client.post(
+            reverse("checkout"),
+            {
+                "full_name": "Test Shopper",
+                "phone": "+966500000002",
+                "city": "Jeddah",
+                "address": "Test Address",
+                "notes": "Leave at reception",
+            },
+        )
+
+        order = Order.objects.get(user=shopper)
+        self.assertRedirects(response, reverse("order_confirmation", args=(order.pk,)))
+        self.assertEqual(order.total, Decimal("250.00"))
+        self.assertEqual(order.payment_status, Order.PaymentStatus.DEMO)
+        self.assertEqual(OrderItem.objects.get(order=order).quantity, 2)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, 1)
+        self.assertFalse(shopper.shopping_cart.items.exists())
+
+    def test_customer_cannot_open_another_users_order_confirmation(self):
+        owner = get_user_model().objects.create_user(username="owner", password="Safe-Test-Pass-941!")
+        other = get_user_model().objects.create_user(username="other", password="Safe-Test-Pass-941!")
+        order = Order.objects.create(
+            user=owner,
+            full_name="Order Owner",
+            phone="123456789",
+            city="Riyadh",
+            address="Private Address",
+            subtotal=Decimal("125.00"),
+            total=Decimal("125.00"),
+        )
+        self.client.force_login(other)
+
+        response = self.client.get(reverse("order_confirmation", args=(order.pk,)))
+
+        self.assertEqual(response.status_code, 404)
+
+
+class CacheAndThrottleTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = APIClient()
+
+    def test_public_product_api_cache_is_invalidated_when_catalog_changes(self):
+        Product.objects.create(
+            name="مسك أبيض", name_en="White Musk", description="ناعم",
+            description_en="Soft", price=Decimal("100.00"), stock=2,
+        )
+        first = self.client.get("/api/products/")
+        self.assertEqual(len(first.data), 1)
+
+        Product.objects.create(
+            name="ورد هادئ", name_en="Quiet Rose", description="زهري",
+            description_en="Floral", price=Decimal("110.00"), stock=2,
+        )
+        second = self.client.get("/api/products/")
+
+        self.assertEqual(len(second.data), 2)
+
+    def test_assistant_endpoint_uses_shared_cache_backed_throttle(self):
+        cache.clear()
+        statuses = [
+            self.client.post(
+                "/api/assistant/", {"message": "What is 10 times 10?", "language": "en"}, format="json"
+            ).status_code
+            for _ in range(31)
+        ]
+
+        self.assertEqual(statuses[:30], [200] * 30)
+        self.assertEqual(statuses[30], 429)

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.utils.translation import get_language
 
@@ -13,6 +14,14 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     stock = models.PositiveIntegerField(default=10, verbose_name='الكمية المتوفرة')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=("available", "stock", "-created_at"),
+                name="product_public_catalog_idx",
+            ),
+        ]
 
     @property
     def localized_name(self):
@@ -44,8 +53,21 @@ class StoreContent(models.Model):
 
     @classmethod
     def get_solo(cls):
-        content, _ = cls.objects.get_or_create(pk=1)
+        content = cache.get("store:home-content:v1")
+        if content is None:
+            content, _ = cls.objects.get_or_create(pk=1)
+            cache.set("store:home-content:v1", content, timeout=300)
         return content
+
+    def save(self, *args, **kwargs):
+        result = super().save(*args, **kwargs)
+        cache.delete("store:home-content:v1")
+        return result
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        cache.delete("store:home-content:v1")
+        return result
 
     def __str__(self):
         return 'PERFUME home page content'

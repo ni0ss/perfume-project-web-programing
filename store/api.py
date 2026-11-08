@@ -6,8 +6,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.reverse import reverse
+from rest_framework.throttling import ScopedRateThrottle
+from django.core.cache import cache
 
 from .models import Order, Product, StoreContent
+from .signals import PUBLIC_CATALOG_VERSION_KEY
 from .serializers import AdminOrderSerializer, ProductSerializer, StoreContentSerializer
 from .assistant_service import answer_store_question
 
@@ -45,6 +48,24 @@ class ProductViewSet(viewsets.ModelViewSet):
             permission_classes = (permissions.IsAdminUser,)
         return [permission() for permission in permission_classes]
 
+    def list(self, request, *args, **kwargs):
+        # Staff can see unavailable inventory, so keep that response uncached.
+        # Public catalog responses are safe to share and keyed by language and
+        # host so localized text and absolute media URLs stay correct.
+        if request.user.is_staff:
+            return super().list(request, *args, **kwargs)
+
+        version = cache.get(PUBLIC_CATALOG_VERSION_KEY, 0)
+        language = getattr(request, "LANGUAGE_CODE", "ar") or "ar"
+        cache_key = f"catalog:public:v{version}:{language}:{request.get_host()}"
+        data = cache.get(cache_key)
+        if data is None:
+            response = super().list(request, *args, **kwargs)
+            data = response.data
+            cache.set(cache_key, data, timeout=300)
+            return response
+        return Response(data)
+
 
 class AdminOrderViewSet(viewsets.ModelViewSet):
     """Staff can view orders and update their status through the REST API."""
@@ -73,6 +94,8 @@ class LocalAssistantView(APIView):
 
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "assistant"
 
     def post(self, request):
         raw_message = request.data.get("message", "")
