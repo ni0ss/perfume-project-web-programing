@@ -10,6 +10,8 @@ __pycache__/
 
 # Django
 *.log
+/db.sqlite3
+/db.sqlite3-*
 test-artifacts/
 
 # macOS

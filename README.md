@@ -72,7 +72,7 @@ The project applies Django tests, a Selenium storefront flow, GitHub Actions, Do
 
 ## One-command setup on another computer
 
-Copy or extract the **entire project folder** to the other computer. Keep `compose.yaml`, `Dockerfile`, the Django source folders, `db.sqlite3`, and `media/` together. The Ollama models are stored in a Docker volume and are not included in the project folder, so the new computer downloads them during its first setup.
+Copy or extract the **entire project folder** to the other computer. Keep `compose.yaml`, `Dockerfile`, the Django source folders, and `media/` together. The project creates a fresh local SQLite database in a Docker volume and seeds a small public demo catalog on first startup; `db.sqlite3` is excluded from Git so customer accounts and orders stay local. The Ollama models are stored in a Docker volume and are not included in the project folder, so the new computer downloads them during its first setup.
 
 Install Docker Desktop first and start it. Installing Docker itself is an operating-system-level step and is deliberately not automated by these project scripts; it may require administrator approval and differs between macOS, Windows, and Linux. The setup scripts then build the web image, start Ollama, download any missing models, start the website, list the models, and open the site. Internet access is required the first time, and both model downloads can take a while.
 
@@ -203,6 +203,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py seed_demo_catalog
 python manage.py runserver
 ```
 

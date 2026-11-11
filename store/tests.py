@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -297,3 +298,19 @@ class CacheAndThrottleTests(TestCase):
 
         self.assertEqual(statuses[:30], [200] * 30)
         self.assertEqual(statuses[30], 429)
+
+
+class DemoCatalogCommandTests(TestCase):
+    def test_seed_command_is_repeatable_and_keeps_existing_edits(self):
+        call_command("seed_demo_catalog", verbosity=0)
+        self.assertEqual(Product.objects.count(), 5)
+
+        product = Product.objects.get(name_en="Rose Musk")
+        product.price = Decimal("450.00")
+        product.save(update_fields=("price",))
+
+        call_command("seed_demo_catalog", verbosity=0)
+
+        self.assertEqual(Product.objects.count(), 5)
+        product.refresh_from_db()
+        self.assertEqual(product.price, Decimal("450.00"))
