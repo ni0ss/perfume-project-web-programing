@@ -124,6 +124,7 @@ services:
 
   proxy:
     image: haproxy:3.2-alpine
+    user: "0:0"
     entrypoint: ["/bin/sh", "-ec"]
     command:
       - |
