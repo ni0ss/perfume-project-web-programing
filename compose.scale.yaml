@@ -122,8 +122,8 @@ services:
       timeout: 3s
       retries: 30
 
-  tls-init:
-    image: alpine:3.21
+  proxy:
+    image: haproxy:3.2-alpine
     entrypoint: ["/bin/sh", "-ec"]
     command:
       - |
@@ -135,15 +135,8 @@ services:
           cat /certs/localhost.crt /certs/localhost.key > /certs/localhost.pem
           chmod 600 /certs/localhost.key /certs/localhost.pem
         fi
-    volumes:
-      - scale_tls_certs:/certs
-    restart: "no"
-
-  proxy:
-    image: haproxy:3.2-alpine
+        exec haproxy -W -db -f /usr/local/etc/haproxy/haproxy.cfg
     depends_on:
-      tls-init:
-        condition: service_completed_successfully
       web:
         condition: service_started
       media:
