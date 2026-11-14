@@ -1,15 +1,45 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.cache import cache
 from django.core.management import call_command
-from django.test import Client, TestCase
+from django.test import Client, SimpleTestCase, TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from .assistant_ml import classify_intent, normalize_text, tokenize
 from .assistant_service import _answer_arithmetic
 from .models import Cart, CartItem, Order, OrderItem, Product, StoreContent
+
+
+class HealthCheckTests(TestCase):
+    def test_healthz_returns_json_ok(self):
+        response = self.client.get("/healthz/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+
+
+class ProductReadReplicaRouterTests(SimpleTestCase):
+    def setUp(self):
+        from .db_routers import ProductReadReplicaRouter
+
+        self.router = ProductReadReplicaRouter()
+
+    def test_catalog_reads_use_replica_but_writes_use_primary(self):
+        with patch.dict(settings.DATABASES, {"default": {}, "replica": {}}, clear=True):
+            self.assertEqual(self.router.db_for_read(Product), "replica")
+            self.assertEqual(self.router.db_for_write(Product), "default")
+
+    def test_without_replica_reads_fall_back_to_default(self):
+        with patch.dict(settings.DATABASES, {"default": {}}, clear=True):
+            self.assertIsNone(self.router.db_for_read(Product))
+
+    def test_non_catalog_data_never_uses_replica(self):
+        with patch.dict(settings.DATABASES, {"default": {}, "replica": {}}, clear=True):
+            self.assertIsNone(self.router.db_for_read(Order))
+            self.assertFalse(self.router.allow_migrate("replica", "store", "product"))
 
 
 class LocalIntentClassifierTests(TestCase):

@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: perfume-migrate
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: perfume-migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: perfume-project:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "python manage.py migrate && python manage.py seed_demo_catalog"]
+          envFrom:
+            - configMapRef:
+                name: perfume-runtime
+            - secretRef:
+                name: perfume-secrets

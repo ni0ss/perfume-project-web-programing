@@ -38,7 +38,8 @@ A bilingual (English and Arabic) educational perfume e-commerce website built wi
 - **Containerization:** Docker and Docker Compose.
 - **Local inference server:** Ollama.
 - **Language models:** Qwen 3 4B and Hermes 3 3B, served locally by Ollama.
-- **Database:** SQLite for this educational project.
+- **Database:** SQLite in the lightweight default setup; optional PostgreSQL primary plus streaming read replica in the scalability lab.
+- **Reverse proxy and TLS:** HAProxy round-robin lab with a generated, self-signed localhost certificate.
 - **Shared cache:** Redis in Docker Compose; local-memory cache when `CACHE_URL` is not set.
 
 ## How the Docker and local AI setup was built
@@ -53,7 +54,7 @@ The setup consists of:
    - `cache`: provides shared, disposable Redis cache data for the catalog API and assistant rate limit.
    - `ollama`: runs the local Ollama server and keeps downloaded model files in the `ollama_data` volume.
    - `ollama-models`: waits for Ollama, checks whether each required model is already available, and downloads it only when it is missing. It must finish before the web service starts.
-3. **Persistent data:** Ollama models are stored in a named Docker volume. The existing SQLite database and media directory are mounted from the project folder.
+3. **Persistent data:** Ollama models and the default SQLite database are stored in named Docker volumes. Product media is mounted from the project folder.
 4. **Django assistant integration:** the assistant service answers store-related questions from the local catalog and calls Ollama for general prompts. Simple arithmetic is handled locally for reliable results. The assistant follows the language of the question where possible.
 5. **Model selection:** the assistant interface lets the user choose Qwen 3 4B (the default) or Hermes 3 3B. Both are stored in the persistent Ollama volume.
 
@@ -62,6 +63,49 @@ The main project files for this setup are `Dockerfile`, `compose.yaml`, `config/
 ## CS50 Web Weeks 7 and 8
 
 The project applies Django tests, a Selenium storefront flow, GitHub Actions, Docker image builds, shared caching, API throttling, catalog indexing, and production security settings. The mapping, demo steps, and the parts that need a larger deployment are documented in [docs/week7-week8.md](docs/week7-week8.md).
+
+### Local scalability and security lab
+
+The regular `compose.yaml` stays a simple SQLite-based single web container. To demonstrate the remaining infrastructure topics without downloading the optional AI models, run the separate lab:
+
+```bash
+sh scripts/start-scale-demo.sh
+```
+
+The script creates ignored local secrets in `.env.scale` and starts three Gunicorn web containers, a Redis cache, PostgreSQL primary and streaming replica, a round-robin HAProxy, and a local TLS certificate. The certificate is self-signed, so browsers show a trust warning; use `curl -k` for local checks. **This is a single-computer teaching lab, not a production deployment.**
+
+Useful checks:
+
+```bash
+docker compose --env-file .env.scale -f compose.scale.yaml ps
+curl -k -I https://localhost:8443/en/
+curl -I http://localhost:8080/en/
+```
+
+Open <http://localhost:8404/stats> to inspect HAProxy backend health and request counts. PostgreSQL replication status can be checked with:
+
+```bash
+docker compose --env-file .env.scale -f compose.scale.yaml exec postgres-primary \
+  psql -U postgres -d perfume -c "SELECT client_addr, state, sync_state FROM pg_stat_replication;"
+```
+
+The product read router directs catalog SELECTs to the replica; writes, sessions, carts, orders, and administration stay on the primary. Replication is asynchronous, so a just-written catalog item can take a short time to appear through a replica read.
+
+To scale the local web containers manually, change `--scale web=3` in the script or run:
+
+```bash
+docker compose --env-file .env.scale -f compose.scale.yaml up --detach --scale web=4 proxy
+```
+
+The Kubernetes HorizontalPodAutoscaler manifest in `deploy/kubernetes/perfume-web.yaml` demonstrates automatic scaling from 2 to 6 pods at a 70% CPU target. It requires a Kubernetes cluster, Metrics Server, a built image, runtime secrets, and PostgreSQL/Redis/Ollama services reachable inside that cluster; the manifest is configuration, not a claim that a cloud cluster has been deployed. The [Kubernetes guide](deploy/kubernetes/README.md) lists the required setup order. See [the complete course mapping and demonstration guide](docs/week7-week8.md).
+
+Stop the lab while retaining its database and generated certificate with:
+
+```bash
+docker compose --env-file .env.scale -f compose.scale.yaml down
+```
+
+`down --volumes` removes the lab database and TLS certificate.
 
 ## Prerequisites
 

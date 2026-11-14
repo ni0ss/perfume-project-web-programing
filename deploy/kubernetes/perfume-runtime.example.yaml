@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: perfume-runtime
+data:
+  DJANGO_DEBUG: "0"
+  DJANGO_ALLOWED_HOSTS: perfume.example.com
+  DJANGO_CSRF_TRUSTED_ORIGINS: https://perfume.example.com
+  DJANGO_USE_X_FORWARDED_PROTO: "1"
+  DJANGO_SECURE_SSL_REDIRECT: "1"
+  DJANGO_SESSION_COOKIE_SECURE: "1"
+  DJANGO_CSRF_COOKIE_SECURE: "1"
+  DJANGO_DATABASE_ENGINE: django.db.backends.postgresql
+  DJANGO_DATABASE_NAME: perfume
+  DJANGO_DATABASE_USER: perfume_app
+  DJANGO_DATABASE_HOST: postgres-primary
+  DJANGO_DATABASE_REPLICA_HOST: postgres-replica
+  DJANGO_DATABASE_PORT: "5432"
+  CACHE_URL: redis://cache:6379/1
+  OLLAMA_BASE_URL: http://ollama:11434
+---
+# Create separately; never commit real values:
+# kubectl create secret generic perfume-secrets \
+#   --from-literal=DJANGO_SECRET_KEY="$(openssl rand -hex 48)" \
+#   --from-literal=DJANGO_DATABASE_PASSWORD="..."

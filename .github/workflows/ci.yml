@@ -57,7 +57,27 @@ jobs:
           DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
         run: python manage.py check --deploy
       - name: Build Docker image
-        run: docker build -t perfume-project:ci .
+        run: docker build -t perfume-project:scale-demo .
+      - name: Validate local scaling, TLS, and database replication lab
+        env:
+          SCALE_ENV_FILE: ${{ runner.temp }}/perfume-scale.env
+        run: |
+          cat > "$SCALE_ENV_FILE" <<'EOF'
+          SCALE_DEMO_DJANGO_SECRET_KEY=ci-only-local-demo-secret-not-for-deployment
+          SCALE_DEMO_POSTGRES_PASSWORD=ci-only-postgres-password
+          SCALE_DEMO_APP_PASSWORD=ci-only-app-password
+          SCALE_DEMO_REPLICATION_PASSWORD=ci-only-replication-password
+          EOF
+          docker compose --env-file "$SCALE_ENV_FILE" -f compose.scale.yaml up --detach --scale web=3 proxy
+          sh scripts/check-scale-demo.sh "$SCALE_ENV_FILE"
+      - name: Stop scale demo containers
+        if: always()
+        env:
+          SCALE_ENV_FILE: ${{ runner.temp }}/perfume-scale.env
+        run: |
+          if [ -f "$SCALE_ENV_FILE" ]; then
+            docker compose --env-file "$SCALE_ENV_FILE" -f compose.scale.yaml down --volumes || true
+          fi
       - name: Upload browser proof
         if: always()
         uses: actions/upload-artifact@v4

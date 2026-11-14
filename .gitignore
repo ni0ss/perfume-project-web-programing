@@ -7,12 +7,16 @@ __pycache__/
 
 # Environment variables
 .env
+.env.scale
 
 # Django
 *.log
 /db.sqlite3
 /db.sqlite3-*
 test-artifacts/
+chromedriver/
+staticfiles/*
+!staticfiles/.gitkeep
 
 # macOS
 .DS_Store

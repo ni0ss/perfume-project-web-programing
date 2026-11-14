@@ -71,6 +71,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -104,12 +105,35 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("DJANGO_DATABASE_PATH", str(BASE_DIR / "db.sqlite3")),
+database_engine = os.environ.get("DJANGO_DATABASE_ENGINE", "django.db.backends.sqlite3")
+if database_engine == "django.db.backends.sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": database_engine,
+            "NAME": os.environ.get("DJANGO_DATABASE_PATH", str(BASE_DIR / "db.sqlite3")),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": database_engine,
+            "NAME": os.environ.get("DJANGO_DATABASE_NAME", "perfume"),
+            "USER": os.environ.get("DJANGO_DATABASE_USER", "perfume"),
+            "PASSWORD": os.environ.get("DJANGO_DATABASE_PASSWORD", ""),
+            "HOST": os.environ.get("DJANGO_DATABASE_HOST", "localhost"),
+            "PORT": os.environ.get("DJANGO_DATABASE_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.environ.get("DJANGO_DATABASE_CONN_MAX_AGE", "60")),
+        }
+    }
+
+replica_host = os.environ.get("DJANGO_DATABASE_REPLICA_HOST", "").strip()
+if replica_host:
+    DATABASES["replica"] = {
+        **DATABASES["default"],
+        "HOST": replica_host,
+        "CONN_MAX_AGE": int(os.environ.get("DJANGO_DATABASE_CONN_MAX_AGE", "60")),
+    }
+DATABASE_ROUTERS = ["store.db_routers.ProductReadReplicaRouter"]
 
 
 # Password validation
@@ -154,6 +178,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+WHITENOISE_USE_FINDERS = DEBUG
 
 
 # Email

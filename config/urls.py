@@ -20,6 +20,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
+from django.db import DatabaseError, connection
+from django.http import JsonResponse
 from rest_framework.routers import DefaultRouter
 from store.api import AdminOrderViewSet, LocalAssistantView, ProductViewSet, StoreContentView, api_root
 
@@ -29,7 +31,18 @@ api_router.register('products', ProductViewSet, basename='api-product')
 api_router.register('orders', AdminOrderViewSet, basename='api-order')
 
 
+def healthz(request):
+    """Readiness endpoint used by the local load balancer and Kubernetes."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except DatabaseError:
+        return JsonResponse({"status": "unavailable"}, status=503)
+    return JsonResponse({"status": "ok"})
+
+
 urlpatterns = [
+    path('healthz/', healthz, name='healthz'),
     path('i18n/', include('django.conf.urls.i18n')),
     path('api/', api_root, name='api-root'),
     path('api/site-content/', StoreContentView.as_view(), name='api-store-content'),
