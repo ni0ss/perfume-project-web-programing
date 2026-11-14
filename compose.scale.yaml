@@ -148,7 +148,7 @@ services:
       - "127.0.0.1:8404:8404"
     volumes:
       - ./deploy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-      - scale_tls_certs:/certs:ro
+      - scale_tls_certs:/certs
     restart: unless-stopped
 
   media:
